@@ -67,6 +67,7 @@ FILES_UI = \
 	sources/ui/components/MainToolBar.cpp \
 	sources/ui/components/FloatingWindow.cpp \
 	sources/ui/components/SkinSlider.cpp \
+	sources/ui/components/SpinBoxChooser.cpp \
 	sources/ui/KnobSkin.cpp \
 	sources/ui/FontEngine.cpp \
 	sources/ui/Fontstash.cpp \

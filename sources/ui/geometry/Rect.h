@@ -52,6 +52,13 @@ public:
         ri.h = std::max(this->bottom(), r.bottom()) - ri.y + 1;
         return ri;
     }
+    bool contains(const PointT<T> &p) const {
+        return p.x >= this->x && p.y >= this->y &&
+            p.x < (this->x + this->w) && p.y < (this->y + this->h);
+    }
+    bool contains(T x, T y) const {
+        return contains(PointT<T>(x, y));
+    }
     RectT<T> from_top(T q) const {
         return RectT<T>(this->x, this->y, this->w, q);
     }

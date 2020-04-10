@@ -28,10 +28,13 @@
 #include "DistrhoUI.hpp"
 #include "PluginSpectralAnalyzer.hpp"
 #include "ui/components/MainToolBar.h"
+#include <string>
 #include <vector>
 #include <memory>
 class FontEngine;
 class SpectrumView;
+class FloatingWindow;
+class KnobSkin;
 
 class UISpectralAnalyzer : public UI, MainToolBar::Listener {
 public:
@@ -56,10 +59,23 @@ protected:
 private:
     void updateSpectrum();
 
+    template <class W, class... A>
+    W *makeSubwidget(A &&... args)
+    {
+        W *w = new W(std::forward<A>(args)...);
+        fSubWidgets.push_back(std::unique_ptr<Widget>(w));
+        return w;
+    }
+
 private:
     std::unique_ptr<FontEngine> fFontEngine;
     std::unique_ptr<SpectrumView> fSpectrumView;
     std::unique_ptr<MainToolBar> fMainToolBar;
+    std::unique_ptr<FloatingWindow> fSetupWindow;
+
+    std::unique_ptr<KnobSkin> fSkinKnob;
+
+    std::vector<std::unique_ptr<Widget>> fSubWidgets;
 
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 

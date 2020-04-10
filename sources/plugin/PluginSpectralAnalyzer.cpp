@@ -25,6 +25,7 @@
  */
 
 #include "PluginSpectralAnalyzer.hpp"
+#include "dsp/AnalyzerDefs.h"
 #include "blink/DenormalDisabler.h"
 #include <memory>
 #include <cstring>
@@ -70,17 +71,16 @@ void PluginSpectralAnalyzer::sampleRateChanged(double newSampleRate)
 {
     fSampleRate = newSampleRate;
 
-    std::lock_guard<std::mutex> lock(fSendMutex);
+    std::unique_lock<std::mutex> lock(fSendMutex);
+    constexpr uint32_t specMaxSize = kStftMaxSize / 2 + 1;
+    fSendFrequencies.resize(kNumChannels * specMaxSize);
+    fSendMagnitudes.resize(kNumChannels * specMaxSize);
+    lock.unlock();
 
-    const uint32_t fftSize = 1024;
-    const uint32_t specSize = fftSize / 2 + 1;
-    const uint32_t stepSize = 64;
-
-    for (STFT &stft : fStft) {
-        stft.configure(fftSize, stepSize, 250e-3, newSampleRate);
-        fSendFrequencies.resize(kNumChannels * specSize);
-        fSendMagnitudes.resize(kNumChannels * specSize);
-    }
+    const uint32_t fftSize = kStftDefaultSize;
+    const uint32_t stepSize = kStftStepSize;
+    for (STFT &stft : fStft)
+        stft.configure(fftSize, stepSize, kStftSmoothTime, newSampleRate);
 }
 
 /**

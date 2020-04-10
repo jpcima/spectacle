@@ -26,7 +26,12 @@
 
 #include "UISpectralAnalyzer.hpp"
 #include "ui/components/SpectrumView.h"
+#include "ui/components/FloatingWindow.h"
+#include "ui/components/SkinSlider.hpp"
+#include "ui/components/SpinBoxChooser.h"
 #include "ui/FontEngine.h"
+#include "ui/KnobSkin.hpp"
+#include "dsp/AnalyzerDefs.h"
 #include "Window.hpp"
 
 static constexpr uint8_t fontRegular[] = {
@@ -34,6 +39,9 @@ static constexpr uint8_t fontRegular[] = {
 };
 static constexpr uint8_t fontAwesome[] = {
     #include "fonts/fontawesome/Font-Awesome-5-Free-Solid-900.otf.h"
+};
+static constexpr uint8_t knobPng[] = {
+    #include "skin/knob.png.h"
 };
 
 enum {
@@ -62,6 +70,20 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     tb->addButton(kToolBarIdScale, "Scale", "\uf0b2");
     tb->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
     tb->setListener(this);
+
+    fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
+
+    fSetupWindow.reset(new FloatingWindow(this));
+    fSetupWindow->setVisible(false);
+    fSetupWindow->setSize(200, 200);
+    {
+        SpinBoxChooser *chooser = makeSubwidget<SpinBoxChooser>(fSetupWindow.get(), *fe);
+        chooser->setSize(150, 20);
+        chooser->setAbsolutePos(25, 50);
+        for (uint32_t size = kStftMinSize; size <= kStftMaxSize; size <<= 1)
+            chooser->addChoice(size, nullptr);
+        fSetupWindow->moveAlong(chooser);
+    }
 
     uiReshape(getWidth(), getHeight());
 }
@@ -141,6 +163,22 @@ void UISpectralAnalyzer::onDisplay()
 
 void UISpectralAnalyzer::onToolBarItemClicked(int id)
 {
+    switch (id) {
+    case kToolBarIdSetup:
+        if (fSetupWindow->isVisible())
+            fSetupWindow->setVisible(false);
+        else {
+            fSetupWindow->setVisible(true);
+            fSetupWindow->setAbsolutePos(100, 100);
+        }
+        break;
+    case kToolBarIdScale:
+        //
+        break;
+    case kToolBarIdFreeze:
+        //
+        break;
+    }
 }
 
 // -----------------------------------------------------------------------

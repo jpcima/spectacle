@@ -1,4 +1,5 @@
 #include "STFT.h"
+#include "AnalyzerDefs.h"
 #include <algorithm>
 #include <unordered_map>
 #include <mutex>
@@ -6,17 +7,15 @@
 
 STFT::STFT()
 {
-    constexpr uint32_t capacity = 65536;
+    _ring.reserve(kStftMaxSize);
+    _real.reserve(kStftMaxSize);
+    _cpx.reserve(kStftMaxSize / 2 + 1);
+    _window.reserve(kStftMaxSize);
 
-    _ring.reserve(capacity);
-    _real.reserve(capacity);
-    _cpx.reserve(capacity / 2 + 1);
-    _window.reserve(capacity);
-
-    for (uint32_t size = 256; size <= 65536; size <<= 1)
+    for (uint32_t size = kStftMinSize; size <= kStftMaxSize; size <<= 1)
         prepareFFT(size);
 
-    configure(1024, 64, 100e-3, 44100.0);
+    configure(kStftDefaultSize, kStftStepSize, kStftSmoothTime, 44100.0);
 }
 
 STFT::~STFT()
