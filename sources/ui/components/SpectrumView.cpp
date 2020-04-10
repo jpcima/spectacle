@@ -1,5 +1,5 @@
 #include "SpectrumView.h"
-#include "FontEngine.h"
+#include "ui/FontEngine.h"
 #include "Color.hpp"
 #include "Window.hpp"
 #include "Cairo.hpp"

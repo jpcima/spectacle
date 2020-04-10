@@ -25,12 +25,21 @@
  */
 
 #include "UISpectralAnalyzer.hpp"
+#include "ui/components/SpectrumView.h"
 #include "ui/FontEngine.h"
-#include "ui/SpectrumView.h"
 #include "Window.hpp"
 
 static constexpr uint8_t fontRegular[] = {
     #include "fonts/liberation/LiberationSans-Regular.ttf.h"
+};
+static constexpr uint8_t fontAwesome[] = {
+    #include "fonts/fontawesome/Font-Awesome-5-Free-Solid-900.otf.h"
+};
+
+enum {
+    kToolBarIdSetup = 1,
+    kToolBarIdScale,
+    kToolBarIdFreeze,
 };
 
 // -----------------------------------------------------------------------
@@ -42,9 +51,17 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     FontEngine *fe = new FontEngine;
     fFontEngine.reset(fe);
     fe->addFont("regular", fontRegular, sizeof(fontRegular));
+    fe->addFont("awesome", fontAwesome, sizeof(fontAwesome));
 
     SpectrumView *sv = new SpectrumView(this, *fe);
     fSpectrumView.reset(sv);
+
+    MainToolBar *tb = new MainToolBar(this, *fe);
+    fMainToolBar.reset(tb);
+    tb->addButton(kToolBarIdSetup, "Setup", "\uf085");
+    tb->addButton(kToolBarIdScale, "Scale", "\uf0b2");
+    tb->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
+    tb->setListener(this);
 
     uiReshape(getWidth(), getHeight());
 }
@@ -109,11 +126,20 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
 {
     fSpectrumView->setAbsolutePos(0, 0);
     fSpectrumView->setSize(width, height);
+
+    fMainToolBar->setAbsolutePos(0, 0);
+    fMainToolBar->setSize(fMainToolBar->getIdealWidth(), 40);
 }
 
 // -----------------------------------------------------------------------
 
 void UISpectralAnalyzer::onDisplay()
+{
+}
+
+// -----------------------------------------------------------------------
+
+void UISpectralAnalyzer::onToolBarItemClicked(int id)
 {
 }
 

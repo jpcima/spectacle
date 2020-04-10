@@ -48,7 +48,7 @@ NAME = spectralanalyzer
 # --------------------------------------------------------------
 # Plugin types to build
 
-BUILD_LV2 ?= true
+BUILD_LV2 ?= false
 BUILD_VST2 ?= false
 BUILD_JACK ?= true
 BUILD_DSSI ?= false
@@ -63,7 +63,11 @@ FILES_DSP = \
 
 FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \
-	sources/ui/SpectrumView.cpp \
+	sources/ui/components/SpectrumView.cpp \
+	sources/ui/components/MainToolBar.cpp \
+	sources/ui/components/FloatingWindow.cpp \
+	sources/ui/components/SkinSlider.cpp \
+	sources/ui/KnobSkin.cpp \
 	sources/ui/FontEngine.cpp \
 	sources/ui/Fontstash.cpp \
 	sources/ui/Cairo++.cpp \
@@ -83,13 +87,19 @@ LINK_FLAGS += -lfftw3f
 # Resources
 
 FILES_RES = \
-	fonts/liberation/LiberationSans-Regular.ttf.h
+	fonts/liberation/LiberationSans-Regular.ttf.h \
+	fonts/fontawesome/Font-Awesome-5-Free-Solid-900.otf.h \
+	skin/knob.png.h
 
 res: $(foreach r,$(FILES_RES),$(BUILD_DIR)/res/$(r))
 
 $(BUILD_DIR)/res/%.h: ../../resources/%.gz
 	mkdir -p $(dir $@)
 	zcat $^ | xxd -i > $@
+
+$(BUILD_DIR)/res/%.h: ../../resources/%
+	mkdir -p $(dir $@)
+	cat $^ | xxd -i > $@
 
 # --------------------------------------------------------------
 # Enable all selected plugin types

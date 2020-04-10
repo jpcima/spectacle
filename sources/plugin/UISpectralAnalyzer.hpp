@@ -27,12 +27,13 @@
 #pragma once
 #include "DistrhoUI.hpp"
 #include "PluginSpectralAnalyzer.hpp"
+#include "ui/components/MainToolBar.h"
 #include <vector>
 #include <memory>
 class FontEngine;
 class SpectrumView;
 
-class UISpectralAnalyzer : public UI {
+class UISpectralAnalyzer : public UI, MainToolBar::Listener {
 public:
     UISpectralAnalyzer();
     ~UISpectralAnalyzer();
@@ -49,12 +50,16 @@ protected:
 
     void onDisplay() override;
 
+protected:
+    void onToolBarItemClicked(int id) override;
+
 private:
     void updateSpectrum();
 
 private:
     std::unique_ptr<FontEngine> fFontEngine;
     std::unique_ptr<SpectrumView> fSpectrumView;
+    std::unique_ptr<MainToolBar> fMainToolBar;
 
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
