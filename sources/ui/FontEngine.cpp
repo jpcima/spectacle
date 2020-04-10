@@ -84,30 +84,30 @@ void FontEngine::drawInBox(cairo_t *cr, const char *text, const Font &font, cons
 
     int fonsalign;
 
-    switch (align & (AlignLeft|AlignRight)) {
+    switch (align & (kAlignLeft|kAlignRight)) {
     default:
         fonsalign = FONS_ALIGN_CENTER;
         x += 0.5 * w;
         break;
-    case AlignLeft:
-        fonsalign = (align & AlignInside) ? FONS_ALIGN_LEFT : FONS_ALIGN_RIGHT;
+    case kAlignLeft:
+        fonsalign = (align & kAlignInside) ? FONS_ALIGN_LEFT : FONS_ALIGN_RIGHT;
         break;
-    case AlignRight:
-        fonsalign = (align & AlignInside) ? FONS_ALIGN_RIGHT : FONS_ALIGN_LEFT;
+    case kAlignRight:
+        fonsalign = (align & kAlignInside) ? FONS_ALIGN_RIGHT : FONS_ALIGN_LEFT;
         x += w;
         break;
     }
 
-    switch (align & (AlignTop|AlignBottom)) {
+    switch (align & (kAlignTop|kAlignBottom)) {
     default:
         fonsalign |= FONS_ALIGN_MIDDLE;
         y += 0.5 * h;
         break;
-    case AlignTop:
-        fonsalign |= (align & AlignInside) ? FONS_ALIGN_TOP : FONS_ALIGN_BOTTOM;
+    case kAlignTop:
+        fonsalign |= (align & kAlignInside) ? FONS_ALIGN_TOP : FONS_ALIGN_BOTTOM;
         break;
-    case AlignBottom:
-        fonsalign |= (align & AlignInside) ? FONS_ALIGN_BOTTOM : FONS_ALIGN_TOP;
+    case kAlignBottom:
+        fonsalign |= (align & kAlignInside) ? FONS_ALIGN_BOTTOM : FONS_ALIGN_TOP;
         y += h;
         break;
     }

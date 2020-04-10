@@ -58,8 +58,8 @@ void MainToolBar::onDisplay()
 
         switch (item.type) {
         case kTypeIcon:
-            fe.drawInBox(cr, item.icon.c_str(), fontIcons, rect, FontEngine::AlignCenter|FontEngine::AlignTop|FontEngine::AlignInside);
-            fe.drawInBox(cr, item.label.c_str(), fontLabel, rect, FontEngine::AlignCenter|FontEngine::AlignBottom|FontEngine::AlignInside);
+            fe.drawInBox(cr, item.icon.c_str(), fontIcons, rect, kAlignCenter|kAlignTop|kAlignInside);
+            fe.drawInBox(cr, item.label.c_str(), fontLabel, rect, kAlignCenter|kAlignBottom|kAlignInside);
             break;
         }
     }

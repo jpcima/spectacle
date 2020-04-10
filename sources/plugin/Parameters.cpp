@@ -18,5 +18,11 @@ void InitParameter(uint32_t index, Parameter &parameter)
             pev[i].value = 1u << (kStftMinSizeLog2 + i);
         }
         break;
+    case kPidReleaseTime:
+        parameter.hints = kParameterIsAutomable|kParameterIsInteger;
+        parameter.name = "Release time";
+        parameter.symbol = "release_time";
+        parameter.ranges = ParameterRanges(kStftDefaultSmoothTime, kStftMinSmoothTime, kStftMaxSmoothTime);
+        break;
     }
 }

@@ -8,6 +8,20 @@
 struct Font;
 
 ///
+enum FontAlign {
+    kAlignCenter = 0,
+    kAlignTop = 1,
+    kAlignBottom = 2,
+    kAlignLeft = 4,
+    kAlignRight = 8,
+    kAlignInside = 16,
+    kAlignTopLeft = kAlignTop|kAlignLeft,
+    kAlignTopRight = kAlignTop|kAlignRight,
+    kAlignBottomLeft = kAlignBottom|kAlignLeft,
+    kAlignBottomRight = kAlignBottom|kAlignRight,
+};
+
+///
 class FontEngine {
 public:
     FontEngine();
@@ -15,19 +29,6 @@ public:
     ~FontEngine();
 
     bool addFont(const char *name, const uint8_t *data, unsigned size);
-
-    enum Align {
-        AlignCenter = 0,
-        AlignTop = 1,
-        AlignBottom = 2,
-        AlignLeft = 4,
-        AlignRight = 8,
-        AlignInside = 16,
-        AlignTopLeft = AlignTop | AlignLeft,
-        AlignTopRight = AlignTop | AlignRight,
-        AlignBottomLeft = AlignBottom | AlignLeft,
-        AlignBottomRight = AlignBottom | AlignRight,
-    };
 
     void draw(cairo_t *cr, const char *text, const Font &font, double x, double y);
     void drawInBox(cairo_t *cr, const char *text, const Font &font, const Rect &box, int align);

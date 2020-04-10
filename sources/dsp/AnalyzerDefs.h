@@ -13,6 +13,8 @@ static constexpr uint32_t kStftDefaultSize = 1u << kStftDefaultSizeLog2;
 
 static constexpr uint32_t kStftStepSize = 64;
 
-static constexpr double kStftSmoothTime = 250e-3;
+static constexpr double kStftMinSmoothTime = 1e-3;
+static constexpr double kStftMaxSmoothTime = 500e-3;
+static constexpr double kStftDefaultSmoothTime = 250e-3;
 
 static constexpr double kStftFloorMagnitude = 1e-9;

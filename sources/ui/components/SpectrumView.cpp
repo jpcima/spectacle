@@ -136,7 +136,7 @@ void SpectrumView::displayBack()
         cairo_move_to(cr, 0, (int)y + 0.5);
         cairo_line_to(cr, width, (int)y + 0.5);
         cairo_stroke(cr);
-        fe.drawInBox(cr, std::to_string(std::lrint(g)).c_str(), font, RectF(0, y + 4, width - 4, 0), FontEngine::AlignTopRight|FontEngine::AlignInside);
+        fe.drawInBox(cr, std::to_string(std::lrint(g)).c_str(), font, RectF(0, y + 4, width - 4, 0), kAlignTopRight|kAlignInside);
     }
 }
 

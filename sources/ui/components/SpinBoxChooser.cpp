@@ -81,20 +81,20 @@ void SpinBoxChooser::onDisplay()
     cairo_rounded_rectangle_with_corners(cr, fBoundsLeftButton, 10.0, RectangleNW|RectangleSW);
     cairo_set_source_rgb(cr, 0.25, 0.25, 0.25);
     cairo_fill(cr);
-    fe.drawInBox(cr, "\uf053", fontAwesome, fBoundsLeftButton, FontEngine::AlignCenter|FontEngine::AlignInside);
+    fe.drawInBox(cr, "\uf053", fontAwesome, fBoundsLeftButton, kAlignCenter|kAlignInside);
 
     ///
     cairo_rounded_rectangle_with_corners(cr, fBoundsRightButton, 10.0, RectangleNE|RectangleSE);
     cairo_set_source_rgb(cr, 0.25, 0.25, 0.25);
     cairo_fill(cr);
-    fe.drawInBox(cr, "\uf054", fontAwesome, fBoundsRightButton, FontEngine::AlignCenter|FontEngine::AlignInside);
+    fe.drawInBox(cr, "\uf054", fontAwesome, fBoundsRightButton, kAlignCenter|kAlignInside);
 
     ///
     cairo_rectangle(cr, fBoundsCenterLabel);
     cairo_set_source_rgb(cr, 0.15, 0.15, 0.15);
     cairo_fill(cr);
     if (!fChoices.empty())
-        fe.drawInBox(cr, fChoices[fValueIndex].second.c_str(), fontRegular, fBoundsCenterLabel, FontEngine::AlignCenter|FontEngine::AlignInside);
+        fe.drawInBox(cr, fChoices[fValueIndex].second.c_str(), fontRegular, fBoundsCenterLabel, kAlignCenter|kAlignInside);
 }
 
 void SpinBoxChooser::onResize(const ResizeEvent &ev)

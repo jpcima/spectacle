@@ -106,6 +106,7 @@ void PluginSpectralAnalyzer::setParameterValue(uint32_t index, float value)
 
     switch (index) {
     case kPidFftSize:
+    case kPidReleaseTime:
         fMustReconfigureStft = 1;
         break;
     }
@@ -137,8 +138,9 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
     if (fMustReconfigureStft.exchange(0)) {
         const double sampleRate = fSampleRate;
         const uint32_t fftSize = 1u << (uint32_t)fParameters[kPidFftSize];
+        const float smoothTime = fParameters[kPidReleaseTime];
         for (STFT &stft : fStft)
-            stft.configure(fftSize, kStftStepSize, kStftSmoothTime, sampleRate);
+            stft.configure(fftSize, kStftStepSize, smoothTime, sampleRate);
     }
 
     for (uint32_t c = 0; c < kNumChannels; ++c) {

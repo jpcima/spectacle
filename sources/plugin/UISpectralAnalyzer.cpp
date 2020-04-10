@@ -30,6 +30,8 @@
 #include "ui/components/FloatingWindow.h"
 #include "ui/components/SkinSlider.hpp"
 #include "ui/components/SpinBoxChooser.h"
+#include "ui/components/Slider.h"
+#include "ui/components/TextLabel.h"
 #include "ui/FontEngine.h"
 #include "ui/KnobSkin.hpp"
 #include "dsp/AnalyzerDefs.h"
@@ -72,18 +74,53 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
 
+    Font fontLabel;
+    fontLabel.name = "regular";
+    fontLabel.size = 12.0;
+    fontLabel.color = {0xff, 0xff, 0xff, 0xff};
+
     fSetupWindow = makeSubwidget<FloatingWindow>(this);
     fSetupWindow->setVisible(false);
-    fSetupWindow->setSize(200, 200);
+    fSetupWindow->setSize(260, 70);
     {
+        int y = 10;
+
+        TextLabel *label;
+
+        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label->setText("Resolution");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fSetupWindow->moveAlong(label);
+
         fFftSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, *fe);
         fFftSizeChooser->setSize(150, 20);
-        fFftSizeChooser->setAbsolutePos(25, 50);
+        fFftSizeChooser->setAbsolutePos(100, y);
         for (uint32_t sizeLog2 = kStftMinSizeLog2; sizeLog2 <= kStftMaxSizeLog2; ++sizeLog2)
             fFftSizeChooser->addChoice(sizeLog2, std::to_string(1u << sizeLog2).c_str());
         fFftSizeChooser->ValueChangedCallback = [this](int32_t value)
             { setParameterValue(kPidFftSize, value); };
         fSetupWindow->moveAlong(fFftSizeChooser);
+
+        y += 30;
+
+        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label->setText("Release time");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fSetupWindow->moveAlong(label);
+
+        fReleaseTimeSlider = makeSubwidget<Slider>(fSetupWindow, *fe);
+        fReleaseTimeSlider->setSize(150, 20);
+        fReleaseTimeSlider->setAbsolutePos(100, y);
+        fReleaseTimeSlider->setValueBounds(kStftMinSmoothTime, kStftMaxSmoothTime);
+        fReleaseTimeSlider->ValueChangedCallback = [this](double value)
+            { setParameterValue(kPidReleaseTime, value); };
+        fSetupWindow->moveAlong(fReleaseTimeSlider);
     }
 
     uiReshape(getWidth(), getHeight());
@@ -110,6 +147,9 @@ void UISpectralAnalyzer::parameterChanged(uint32_t index, float value)
     switch (index) {
     case kPidFftSize:
         fFftSizeChooser->setValue(value);
+        break;
+    case kPidReleaseTime:
+        fReleaseTimeSlider->setValue(value);
         break;
     }
 }

@@ -15,7 +15,7 @@ STFT::STFT()
     for (uint32_t size = kStftMinSize; size <= kStftMaxSize; size <<= 1)
         prepareFFT(size);
 
-    configure(kStftDefaultSize, kStftStepSize, kStftSmoothTime, 44100.0);
+    configure(kStftDefaultSize, kStftStepSize, kStftDefaultSmoothTime, 44100.0);
 }
 
 STFT::~STFT()
