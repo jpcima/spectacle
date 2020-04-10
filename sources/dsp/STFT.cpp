@@ -24,26 +24,34 @@ STFT::~STFT()
 
 void STFT::configure(uint32_t fftSize, uint32_t stepSize, double smoothTime, double sampleRate)
 {
-    _fftPlan = prepareFFT(fftSize);
-    _fftSize = fftSize;
+    if (_fftSize != fftSize || _sampleRate != sampleRate) {
+        _fftPlan = prepareFFT(fftSize);
+        _sampleRate = sampleRate;
+        _fftSize = fftSize;
+        _ring.resize(2 * fftSize);
+        _real.resize(fftSize);
+        _cpx.resize(fftSize / 2 + 1);
+        _window.resize(fftSize);
+        _outputFrequencies.resize(fftSize / 2 + 1);
+        _outputMagnitudes.resize(fftSize / 2 + 1);
+
+        float *window = _window.data();
+        for (uint32_t i = 0; i < fftSize; ++i)
+            window[i] = 0.5 * (1.0 - std::cos(2.0 * M_PI * i / (fftSize - 1)));
+
+        float *frequencies = _outputFrequencies.data();
+        for (uint32_t i = 0; i < fftSize / 2 + 1; ++i)
+            frequencies[i] = i * (float)(sampleRate / fftSize);
+
+        clear();
+    }
+    else {
+        _stepCounter = 0;
+        _ringIndex = 0;
+    }
+
     _stepSize = stepSize;
-    _ring.resize(2 * fftSize);
-    _real.resize(fftSize);
-    _cpx.resize(fftSize / 2 + 1);
-    _window.resize(fftSize);
-    _outputFrequencies.resize(fftSize / 2 + 1);
-    _outputMagnitudes.resize(fftSize / 2 + 1);
     _smoothPole = std::exp(-1.0 / (smoothTime * sampleRate / stepSize));
-
-    float *window = _window.data();
-    for (uint32_t i = 0; i < fftSize; ++i)
-        window[i] = 0.5 * (1.0 - std::cos(2.0 * M_PI * i / (fftSize - 1)));
-
-    float *frequencies = _outputFrequencies.data();
-    for (uint32_t i = 0; i < fftSize / 2 + 1; ++i)
-        frequencies[i] = i * (float)(sampleRate / fftSize);
-
-    clear();
 }
 
 void STFT::clear()

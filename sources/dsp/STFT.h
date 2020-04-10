@@ -29,6 +29,7 @@ private:
 private:
     uint32_t _fftSize {};
     fftwf_plan _fftPlan {};
+    double _sampleRate {};
 
     // analysis step
     uint32_t _stepCounter {};
