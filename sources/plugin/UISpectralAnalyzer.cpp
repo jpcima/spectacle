@@ -214,7 +214,8 @@ void UISpectralAnalyzer::onToolBarItemClicked(int id)
             fSetupWindow->setVisible(false);
         else {
             fSetupWindow->setVisible(true);
-            fSetupWindow->setAbsolutePos(100, 100);
+            fSetupWindow->setAbsolutePos(
+                4, fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4);
         }
         break;
     case kToolBarIdScale:
