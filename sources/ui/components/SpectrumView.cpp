@@ -20,6 +20,15 @@ void SpectrumView::setData(const float *frequencies, const float *magnitudes, ui
     repaint();
 }
 
+void SpectrumView::toggleFreeze()
+{
+    fFreezeFrequencies = fFrequencies;
+    fFreezeMagnitudes = fMagnitudes;
+    fFreezeSize = fSize;
+    fFreezeNumChannels = fNumChannels;
+    fFreeze = !fFreeze;
+}
+
 void SpectrumView::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
@@ -33,8 +42,9 @@ void SpectrumView::onDisplay()
     displayBack();
 
     ///
-    const uint32_t size = fSize;
-    const uint32_t numChannels = fNumChannels;
+    const bool freeze = fFreeze;
+    const uint32_t size = freeze ? fFreezeSize : fSize;
+    const uint32_t numChannels = freeze ? fFreezeNumChannels : fNumChannels;
     Spline &spline = fSpline;
 
     if (size < 4) // need more elements for interpolation
@@ -46,8 +56,8 @@ void SpectrumView::onDisplay()
 
     ///
     for (uint32_t channel = 0; channel < numChannels; ++channel) {
-        const float *rawFrequencies = &fFrequencies[channel * size];
-        const float *rawMagnitudes = &fMagnitudes[channel * size];
+        const float *rawFrequencies = freeze ? &fFreezeFrequencies[channel * size] : &fFrequencies[channel * size];
+        const float *rawMagnitudes = freeze ? &fFreezeMagnitudes[channel * size] : &fMagnitudes[channel * size];
 
         ///
         spline.setup(rawFrequencies, rawMagnitudes, size);

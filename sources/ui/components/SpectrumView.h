@@ -11,6 +11,7 @@ public:
     SpectrumView(Widget *parent, FontEngine &fontEngine);
 
     void setData(const float *frequencies, const float *magnitudes, uint32_t size, uint32_t numChannels);
+    void toggleFreeze();
 
     void onDisplay() override;
 
@@ -32,6 +33,13 @@ private:
     std::vector<float> fMagnitudes;
     uint32_t fSize = 0;
     uint32_t fNumChannels = 0;
+
+    // freeze mode
+    bool fFreeze = false;
+    std::vector<float> fFreezeFrequencies;
+    std::vector<float> fFreezeMagnitudes;
+    uint32_t fFreezeSize = 0;
+    uint32_t fFreezeNumChannels = 0;
 
     // vertical scale (dB)
     float fdBmin = -120.0;

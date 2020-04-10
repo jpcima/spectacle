@@ -221,7 +221,7 @@ void UISpectralAnalyzer::onToolBarItemClicked(int id)
         //
         break;
     case kToolBarIdFreeze:
-        //
+        fSpectrumView->toggleFreeze();
         break;
     }
 }
