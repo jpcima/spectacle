@@ -25,14 +25,28 @@
  */
 
 #include "PluginSpectralAnalyzer.hpp"
+#include "Parameters.h"
 #include "dsp/AnalyzerDefs.h"
 #include "blink/DenormalDisabler.h"
 #include <memory>
 #include <cstring>
 
 PluginSpectralAnalyzer::PluginSpectralAnalyzer()
-    : Plugin(0, 0, 0)
+    : Plugin(kParameterCount, 0, 0),
+      fParameters(new float[kParameterCount]),
+      fParameterRanges(new ParameterRanges[kParameterCount])
 {
+    for (uint32_t i = 0; i < kParameterCount; ++i) {
+        Parameter p;
+        InitParameter(i, p);
+        fParameters[i] = p.ranges.def;
+        fParameterRanges[i] = p.ranges;
+    }
+
+    constexpr uint32_t specMaxSize = kStftMaxSize / 2 + 1;
+    fSendFrequencies.resize(kNumChannels * specMaxSize);
+    fSendMagnitudes.resize(kNumChannels * specMaxSize);
+
     sampleRateChanged(getSampleRate());
 }
 
@@ -45,9 +59,8 @@ PluginSpectralAnalyzer::~PluginSpectralAnalyzer()
 
 void PluginSpectralAnalyzer::initParameter(uint32_t index, Parameter &parameter)
 {
-    (void)index;
-    (void)parameter;
-    DISTRHO_SAFE_ASSERT(false);
+    DISTRHO_SAFE_ASSERT_RETURN(index < kParameterCount, );
+    InitParameter(index, parameter);
 }
 
 /**
@@ -70,17 +83,7 @@ void PluginSpectralAnalyzer::initProgramName(uint32_t index, String &programName
 void PluginSpectralAnalyzer::sampleRateChanged(double newSampleRate)
 {
     fSampleRate = newSampleRate;
-
-    std::unique_lock<std::mutex> lock(fSendMutex);
-    constexpr uint32_t specMaxSize = kStftMaxSize / 2 + 1;
-    fSendFrequencies.resize(kNumChannels * specMaxSize);
-    fSendMagnitudes.resize(kNumChannels * specMaxSize);
-    lock.unlock();
-
-    const uint32_t fftSize = kStftDefaultSize;
-    const uint32_t stepSize = kStftStepSize;
-    for (STFT &stft : fStft)
-        stft.configure(fftSize, stepSize, kStftSmoothTime, newSampleRate);
+    fMustReconfigureStft = 1;
 }
 
 /**
@@ -88,9 +91,8 @@ void PluginSpectralAnalyzer::sampleRateChanged(double newSampleRate)
 */
 float PluginSpectralAnalyzer::getParameterValue(uint32_t index) const
 {
-    (void)index;
-    DISTRHO_SAFE_ASSERT(false);
-    return 0;
+    DISTRHO_SAFE_ASSERT_RETURN(index < kParameterCount, 0.0);
+    return fParameters[index];
 }
 
 /**
@@ -98,9 +100,15 @@ float PluginSpectralAnalyzer::getParameterValue(uint32_t index) const
 */
 void PluginSpectralAnalyzer::setParameterValue(uint32_t index, float value)
 {
-    (void)index;
-    (void)value;
-    DISTRHO_SAFE_ASSERT(false);
+    DISTRHO_SAFE_ASSERT_RETURN(index < kParameterCount, );
+    fParameterRanges[index].fixValue(value);
+    fParameters[index] = value;
+
+    switch (index) {
+    case kPidFftSize:
+        fMustReconfigureStft = 1;
+        break;
+    }
 }
 
 /**
@@ -119,13 +127,19 @@ void PluginSpectralAnalyzer::loadProgram(uint32_t index)
 
 void PluginSpectralAnalyzer::activate()
 {
-    for (STFT &stft : fStft)
-        stft.clear();
+    fMustReconfigureStft = 1;
 }
 
 void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t frames)
 {
     WebCore::DenormalDisabler dd;
+
+    if (fMustReconfigureStft.exchange(0)) {
+        const double sampleRate = fSampleRate;
+        const uint32_t fftSize = 1u << (uint32_t)fParameters[kPidFftSize];
+        for (STFT &stft : fStft)
+            stft.configure(fftSize, kStftStepSize, kStftSmoothTime, sampleRate);
+    }
 
     for (uint32_t c = 0; c < kNumChannels; ++c) {
         STFT &stft = fStft[c];

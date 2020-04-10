@@ -25,6 +25,7 @@
  */
 
 #include "UISpectralAnalyzer.hpp"
+#include "Parameters.h"
 #include "ui/components/SpectrumView.h"
 #include "ui/components/FloatingWindow.h"
 #include "ui/components/SkinSlider.hpp"
@@ -61,28 +62,28 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fe->addFont("regular", fontRegular, sizeof(fontRegular));
     fe->addFont("awesome", fontAwesome, sizeof(fontAwesome));
 
-    SpectrumView *sv = new SpectrumView(this, *fe);
-    fSpectrumView.reset(sv);
+    fSpectrumView = makeSubwidget<SpectrumView>(this, *fe);
 
-    MainToolBar *tb = new MainToolBar(this, *fe);
-    fMainToolBar.reset(tb);
-    tb->addButton(kToolBarIdSetup, "Setup", "\uf085");
-    tb->addButton(kToolBarIdScale, "Scale", "\uf0b2");
-    tb->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
-    tb->setListener(this);
+    fMainToolBar = makeSubwidget<MainToolBar>(this, *fe);
+    fMainToolBar->addButton(kToolBarIdSetup, "Setup", "\uf085");
+    fMainToolBar->addButton(kToolBarIdScale, "Scale", "\uf0b2");
+    fMainToolBar->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
+    fMainToolBar->setListener(this);
 
     fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
 
-    fSetupWindow.reset(new FloatingWindow(this));
+    fSetupWindow = makeSubwidget<FloatingWindow>(this);
     fSetupWindow->setVisible(false);
     fSetupWindow->setSize(200, 200);
     {
-        SpinBoxChooser *chooser = makeSubwidget<SpinBoxChooser>(fSetupWindow.get(), *fe);
-        chooser->setSize(150, 20);
-        chooser->setAbsolutePos(25, 50);
-        for (uint32_t size = kStftMinSize; size <= kStftMaxSize; size <<= 1)
-            chooser->addChoice(size, nullptr);
-        fSetupWindow->moveAlong(chooser);
+        fFftSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, *fe);
+        fFftSizeChooser->setSize(150, 20);
+        fFftSizeChooser->setAbsolutePos(25, 50);
+        for (uint32_t sizeLog2 = kStftMinSizeLog2; sizeLog2 <= kStftMaxSizeLog2; ++sizeLog2)
+            fFftSizeChooser->addChoice(sizeLog2, std::to_string(1u << sizeLog2).c_str());
+        fFftSizeChooser->ValueChangedCallback = [this](int32_t value)
+            { setParameterValue(kPidFftSize, value); };
+        fSetupWindow->moveAlong(fFftSizeChooser);
     }
 
     uiReshape(getWidth(), getHeight());
@@ -106,9 +107,11 @@ PluginSpectralAnalyzer *UISpectralAnalyzer::getPluginInstance()
 */
 void UISpectralAnalyzer::parameterChanged(uint32_t index, float value)
 {
-    (void)index;
-    (void)value;
-    DISTRHO_SAFE_ASSERT(false);
+    switch (index) {
+    case kPidFftSize:
+        fFftSizeChooser->setValue(value);
+        break;
+    }
 }
 
 /**

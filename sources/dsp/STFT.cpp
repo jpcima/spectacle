@@ -51,7 +51,9 @@ void STFT::clear()
     _stepCounter = 0;
     _ringIndex = 0;
     std::fill(_ring.begin(), _ring.end(), 0.0f);
-    std::fill(_outputMagnitudes.begin(), _outputMagnitudes.end(), 0.0f);
+    std::fill(
+        _outputMagnitudes.begin(), _outputMagnitudes.end(),
+        20.0 * std::log10(kStftFloorMagnitude));
 }
 
 void STFT::process(const float *input, uint32_t numFrames)
@@ -95,9 +97,9 @@ void STFT::processNewWindow(const float *rawInput)
     for (uint32_t i = 0; i < fftSize / 2 + 1; ++i) {
         double curMag = std::abs(cpx[i]) * (2.0f / fftSize);
         if (kOutputNoDcComponent && i == 0)
-            curMag = 1e-9;
+            curMag = kStftFloorMagnitude;
         if (kOutputAsDecibels)
-            curMag = 20.0 * std::log10(std::max(1e-9, (double)curMag));
+            curMag = 20.0 * std::log10(std::max(kStftFloorMagnitude, (double)curMag));
         mag[i] = mag[i] * smoothPole + curMag * (1.0f - smoothPole);
     }
 }

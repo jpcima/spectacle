@@ -34,7 +34,30 @@ void SpinBoxChooser::setValueIndex(int32_t index)
         return;
 
     fValueIndex = index;
+    if (ValueChangedCallback)
+        ValueChangedCallback(value());
     repaint();
+}
+
+int32_t SpinBoxChooser::value() const
+{
+    if (fValueIndex < 0 || (uint32_t)fValueIndex >= fChoices.size())
+        return 0;
+
+    return fChoices[fValueIndex].first;
+}
+
+void SpinBoxChooser::setValue(int32_t value)
+{
+    int32_t i = -1;
+
+    for (uint32_t index = 0, size = fChoices.size(); i == -1 && index < size; ++index) {
+        if (fChoices[index].first == value)
+            i = index;
+    }
+
+    if (i != -1)
+        setValueIndex(i);
 }
 
 void SpinBoxChooser::onDisplay()

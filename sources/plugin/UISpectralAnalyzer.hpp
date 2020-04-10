@@ -34,6 +34,7 @@
 class FontEngine;
 class SpectrumView;
 class FloatingWindow;
+class SpinBoxChooser;
 class KnobSkin;
 
 class UISpectralAnalyzer : public UI, MainToolBar::Listener {
@@ -69,9 +70,10 @@ private:
 
 private:
     std::unique_ptr<FontEngine> fFontEngine;
-    std::unique_ptr<SpectrumView> fSpectrumView;
-    std::unique_ptr<MainToolBar> fMainToolBar;
-    std::unique_ptr<FloatingWindow> fSetupWindow;
+    SpectrumView *fSpectrumView = nullptr;
+    MainToolBar *fMainToolBar = nullptr;
+    FloatingWindow *fSetupWindow = nullptr;
+    SpinBoxChooser *fFftSizeChooser = nullptr;
 
     std::unique_ptr<KnobSkin> fSkinKnob;
 

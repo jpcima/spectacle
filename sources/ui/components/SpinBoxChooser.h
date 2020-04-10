@@ -3,6 +3,7 @@
 #include "ui/Geometry.h"
 #include <string>
 #include <vector>
+#include <functional>
 class FontEngine;
 
 class SpinBoxChooser : public Widget {
@@ -12,6 +13,11 @@ public:
 
     int32_t valueIndex() const;
     void setValueIndex(int32_t index);
+
+    int32_t value() const;
+    void setValue(int32_t value);
+
+    std::function<void(int32_t)> ValueChangedCallback;
 
 protected:
     void onDisplay() override;

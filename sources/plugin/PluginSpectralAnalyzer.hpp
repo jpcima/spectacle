@@ -29,6 +29,7 @@
 #include "dsp/STFT.h"
 #include <mutex>
 #include <memory>
+#include <atomic>
 
 class PluginSpectralAnalyzer : public Plugin {
 public:
@@ -105,11 +106,14 @@ protected:
     void run(const float **inputs, float **outputs, uint32_t frames) override;
 
     // -------------------------------------------------------------------
+
 public:
     std::mutex fSendMutex;
     uint32_t fSendSize = 0;
     std::vector<float> fSendFrequencies;
     std::vector<float> fSendMagnitudes;
+
+    // -------------------------------------------------------------------
 
 private:
     double fSampleRate = 44100;
@@ -117,6 +121,10 @@ private:
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
     STFT fStft[kNumChannels];
+    std::atomic<int> fMustReconfigureStft {0};
+
+    const std::unique_ptr<float[]> fParameters;
+    const std::unique_ptr<ParameterRanges[]> fParameterRanges;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginSpectralAnalyzer)
 };
