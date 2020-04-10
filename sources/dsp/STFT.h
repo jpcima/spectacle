@@ -24,7 +24,7 @@ private:
 
 private:
     static constexpr bool kOutputAsDecibels = true;
-    static constexpr bool kOutputNoDcComponent = true;
+    static constexpr bool kOutputNoDcComponent = false;
 
 private:
     uint32_t _fftSize {};
