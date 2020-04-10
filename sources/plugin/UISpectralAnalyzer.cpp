@@ -120,6 +120,8 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fReleaseTimeSlider->setValueBounds(kStftMinSmoothTime, kStftMaxSmoothTime);
         fReleaseTimeSlider->ValueChangedCallback = [this](double value)
             { setParameterValue(kPidReleaseTime, value); };
+        fReleaseTimeSlider->FormatCallback = [](double value) -> std::string
+            { return std::to_string((int)(value * 1e3)) + " ms"; };
         fSetupWindow->moveAlong(fReleaseTimeSlider);
     }
 

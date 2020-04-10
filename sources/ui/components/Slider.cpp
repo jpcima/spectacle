@@ -143,7 +143,13 @@ void Slider::onDisplay()
     fontRegular.size = 12.0;
     fontRegular.color = {0xff, 0xff, 0xff, 0xff};
 
-    fe.drawInBox(cr, std::to_string(value).c_str(), fontRegular, bounds, kAlignCenter|kAlignInside);
+    std::string text;
+    if (FormatCallback)
+        text = FormatCallback(value);
+    else
+        text = std::to_string(value);
+
+    fe.drawInBox(cr, text.c_str(), fontRegular, bounds, kAlignCenter|kAlignInside);
 }
 
 double Slider::clampToBounds(double value)

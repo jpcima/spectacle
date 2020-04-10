@@ -1,5 +1,6 @@
 #pragma once
 #include "Widget.hpp"
+#include <string>
 #include <functional>
 class FontEngine;
 
@@ -22,6 +23,7 @@ public:
     void onDisplay() override;
 
     std::function<void(double)> ValueChangedCallback;
+    std::function<std::string(double)> FormatCallback;
 
 private:
     double clampToBounds(double value);
