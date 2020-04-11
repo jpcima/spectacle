@@ -36,6 +36,7 @@ class SpectrumView;
 class FloatingWindow;
 class SpinBoxChooser;
 class Slider;
+class TextLabel;
 class SelectionRectangle;
 class KnobSkin;
 
@@ -85,8 +86,11 @@ private:
     Slider *fReleaseTimeSlider = nullptr;
 
     FloatingWindow *fScaleWindow = nullptr;
-
     SelectionRectangle *fSelectionRectangle = nullptr;
+
+    FloatingWindow *fSelectWindow = nullptr;
+    TextLabel *fSelectLabelX = nullptr;
+    TextLabel *fSelectLabelY = nullptr;
 
     std::unique_ptr<KnobSkin> fSkinKnob;
 

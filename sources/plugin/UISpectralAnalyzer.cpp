@@ -36,6 +36,7 @@
 #include "ui/FontEngine.h"
 #include "ui/KnobSkin.hpp"
 #include "dsp/AnalyzerDefs.h"
+#include "util/format_string.h"
 #include "Window.hpp"
 
 static constexpr uint8_t fontRegular[] = {
@@ -175,6 +176,51 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fScaleWindow->moveAlong(label);
     }
 
+    fSelectWindow = makeSubwidget<FloatingWindow>(this);
+    fSelectWindow->setVisible(false);
+    fSelectWindow->setSize(150, 70);
+    {
+        int y = 10;
+
+        TextLabel *label;
+
+        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label->setText("\uf337");
+        label->setFont(fontAwesome);
+        label->setAlignment(kAlignCenter|kAlignInside);
+        label->setAbsolutePos(5, y);
+        label->setSize(20, 20);
+        fSelectWindow->moveAlong(label);
+
+        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        fSelectLabelX = label;
+        //label->setText("");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(30, y);
+        label->setSize(100, 20);
+        fSelectWindow->moveAlong(label);
+
+        y += 30;
+
+        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label->setText("\uf338");
+        label->setFont(fontAwesome);
+        label->setAlignment(kAlignCenter|kAlignInside);
+        label->setAbsolutePos(5, y);
+        label->setSize(20, 20);
+        fSelectWindow->moveAlong(label);
+
+        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        fSelectLabelY = label;
+        //label->setText("");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(30, y);
+        label->setSize(100, 20);
+        fSelectWindow->moveAlong(label);
+    }
+
     fSelectionRectangle = makeSubwidget<SelectionRectangle>(this);
     fSelectionRectangle->setVisible(false);
 
@@ -306,9 +352,14 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
         }
         break;
     case kModeSelect:
-        fSpectrumView->setReferenceLine(
-            fSpectrumView->keyOfX(ev.pos.getX() - fSelectionRectangle->getAbsoluteX()),
-            fSpectrumView->dbMagOfY(ev.pos.getY() - fSelectionRectangle->getAbsoluteY()));
+        {
+            const double key = fSpectrumView->keyOfX(ev.pos.getX() - fSelectionRectangle->getAbsoluteX());
+            const double mag = fSpectrumView->dbMagOfY(ev.pos.getY() - fSelectionRectangle->getAbsoluteY());
+            const double freq = 440.0 * std::exp2((key - 69.0) * (1.0 / 12.0));
+            fSpectrumView->setReferenceLine(key, mag);
+            fSelectLabelX->setText(format_string("%g", freq) + " Hz");
+            fSelectLabelY->setText(format_string("%g", mag) + " dB");
+        }
         break;
     }
 
@@ -348,6 +399,7 @@ void UISpectralAnalyzer::switchMode(int mode)
 
     fSetupWindow->setVisible(false);
     fScaleWindow->setVisible(false);
+    fSelectWindow->setVisible(false);
     fMainToolBar->setSelected(kToolBarIdSetup, false);
     fMainToolBar->setSelected(kToolBarIdScale, false);
     fMainToolBar->setSelected(kToolBarIdSelect, false);
@@ -377,6 +429,8 @@ void UISpectralAnalyzer::switchMode(int mode)
         fScaleRectDragging = false;
         break;
     case kModeSelect:
+        fSelectWindow->setVisible(true);
+        fSelectWindow->setAbsolutePos(floatingPosX, floatingPosY);
         fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
         fSpectrumView->clearReferenceLine();
         break;

@@ -77,6 +77,7 @@ FILES_UI = \
 	sources/ui/FontEngine.cpp \
 	sources/ui/Fontstash.cpp \
 	sources/ui/Cairo++.cpp \
+	sources/util/format_string.cpp \
 	thirdparty/spline/spline/spline.cpp
 
 # --------------------------------------------------------------

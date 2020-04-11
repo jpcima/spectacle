@@ -139,7 +139,6 @@ void SpectrumView::onDisplay()
         const double x = xOfKey(fKeyRef);
         const double y = yOfDbMag(fdBref);
         cairo_set_line_width(cr, 1.0);
-        //cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.2);
         cairo_set_source_rgba8(cr, {0xff, 0xaa, 0x00, 0x40});
         cairo_new_path(cr);
         cairo_move_to(cr, 0, (int)y + 0.5);
