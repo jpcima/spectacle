@@ -353,8 +353,8 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
         break;
     case kModeSelect:
         {
-            const double key = fSpectrumView->keyOfX(ev.pos.getX() - fSelectionRectangle->getAbsoluteX());
-            const double mag = fSpectrumView->dbMagOfY(ev.pos.getY() - fSelectionRectangle->getAbsoluteY());
+            const double key = fSpectrumView->keyOfX(ev.pos.getX() - fSpectrumView->getAbsoluteX());
+            const double mag = fSpectrumView->dbMagOfY(ev.pos.getY() - fSpectrumView->getAbsoluteY());
             const double freq = 440.0 * std::exp2((key - 69.0) * (1.0 / 12.0));
             fSpectrumView->setReferenceLine(key, mag);
             fSelectLabelX->setText(format_string("%g", freq) + " Hz");
