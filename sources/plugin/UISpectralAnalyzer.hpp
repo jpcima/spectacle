@@ -36,6 +36,7 @@ class SpectrumView;
 class FloatingWindow;
 class SpinBoxChooser;
 class Slider;
+class SelectionRectangle;
 class KnobSkin;
 
 class UISpectralAnalyzer : public UI, MainToolBar::Listener {
@@ -54,6 +55,8 @@ protected:
     void uiReshape(uint width, uint height) override;
 
     void onDisplay() override;
+    bool onMouse(const MouseEvent &ev) override;
+    bool onMotion(const MotionEvent &ev) override;
 
 protected:
     void onToolBarItemClicked(int id) override;
@@ -72,10 +75,16 @@ private:
 private:
     std::unique_ptr<FontEngine> fFontEngine;
     SpectrumView *fSpectrumView = nullptr;
+
     MainToolBar *fMainToolBar = nullptr;
+
     FloatingWindow *fSetupWindow = nullptr;
     SpinBoxChooser *fFftSizeChooser = nullptr;
     Slider *fReleaseTimeSlider = nullptr;
+
+    FloatingWindow *fScaleWindow = nullptr;
+
+    SelectionRectangle *fSelectionRectangle = nullptr;
 
     std::unique_ptr<KnobSkin> fSkinKnob;
 
@@ -86,6 +95,15 @@ private:
     std::vector<float> fFrequencies;
     std::vector<float> fMagnitudes;
     uint32_t fSize = 0;
+
+    enum {
+        kModeNormal,
+        kModeScale,
+    };
+
+    int fMode = kModeNormal;
+
+    bool fScaleRectDragging = false;
 
 private:
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UISpectralAnalyzer)

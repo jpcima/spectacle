@@ -29,6 +29,32 @@ void SpectrumView::toggleFreeze()
     fFreeze = !fFreeze;
 }
 
+void SpectrumView::setKeyScale(float keyMin, float keyMax)
+{
+    if (keyMin == fKeyMin || keyMax == fKeyMax)
+        return;
+
+    fKeyMin = keyMin;
+    fKeyMax = keyMax;
+    repaint();
+}
+
+void SpectrumView::setDbScale(float dbMin, float dbMax)
+{
+    if (dbMin == fdBmin || dbMax == fdBmax)
+        return;
+
+    fdBmin = dbMin;
+    fdBmax = dbMax;
+    repaint();
+}
+
+void SpectrumView::setDefaultScales()
+{
+    setKeyScale(kKeyMinDefault, kKeyMaxDefault);
+    setDbScale(kdBminDefault, kdBmaxDefault);
+}
+
 void SpectrumView::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
@@ -117,7 +143,9 @@ void SpectrumView::displayBack()
     ///
     cairo_set_line_width(cr, 1.0);
     cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 0.5);
-    for (int32_t midiKey = (fKeyMin + 9) % 12, keyMax = fKeyMax; midiKey <= keyMax; midiKey += 12)
+    int32_t midiKey = (int32_t)std::ceil(fKeyMin);
+    while ((midiKey + 3) % 12 != 0) ++midiKey;
+    for (const double keyMax = fKeyMax; midiKey <= keyMax; midiKey += 12)
     {
         double frequency = 440.0 * std::exp2((midiKey - 69) * (1.0 / 12.0));
         double x = xOfFrequency(frequency);
@@ -137,8 +165,10 @@ void SpectrumView::displayBack()
     const double dBmax = fdBmax;
     constexpr double dBinterval = 20.0;
 
+    const double dBminAligned = std::round(dBmin / dBinterval) * dBinterval;
+
     for (unsigned i = 0; ; ++i) {
-        double g = dBmin + dBinterval * i;
+        double g = dBminAligned + dBinterval * i;
         if (g > dBmax)
             break;
 
@@ -150,6 +180,16 @@ void SpectrumView::displayBack()
     }
 }
 
+double SpectrumView::keyOfX(double x) const
+{
+    return keyOfR(x / getWidth());
+}
+
+double SpectrumView::keyOfR(double r) const
+{
+    return r * (fKeyMax - fKeyMin) + fKeyMin;
+}
+
 double SpectrumView::frequencyOfX(double x) const
 {
     return frequencyOfR(x / getWidth());
@@ -157,8 +197,7 @@ double SpectrumView::frequencyOfX(double x) const
 
 double SpectrumView::frequencyOfR(double r) const
 {
-    double midiKey = r * (fKeyMax - fKeyMin) + fKeyMin;
-    return 440.0 * std::exp2((midiKey - 69.0) * (1.0 / 12.0));
+    return 440.0 * std::exp2((keyOfR(r) - 69.0) * (1.0 / 12.0));
 }
 
 double SpectrumView::rOfFrequency(double f) const
@@ -172,6 +211,16 @@ double SpectrumView::xOfFrequency(double f) const
     return rOfFrequency(f) * getWidth();
 }
 
+double SpectrumView::dbMagOfY(double y) const
+{
+    return dbMagOfR(1 - y / getHeight());
+}
+
+double SpectrumView::dbMagOfR(double r) const
+{
+    return fdBmin + r * (fdBmax - fdBmin);
+}
+
 double SpectrumView::rOfDbMag(double m) const
 {
     return (m - fdBmin) / (fdBmax - fdBmin);
@@ -181,3 +230,8 @@ double SpectrumView::yOfDbMag(double m) const
 {
     return (1 - rOfDbMag(m)) * getHeight();
 }
+
+constexpr float SpectrumView::kdBminDefault;
+constexpr float SpectrumView::kdBmaxDefault;
+constexpr float SpectrumView::kKeyMinDefault;
+constexpr float SpectrumView::kKeyMaxDefault;

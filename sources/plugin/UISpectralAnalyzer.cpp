@@ -32,6 +32,7 @@
 #include "ui/components/SpinBoxChooser.h"
 #include "ui/components/Slider.h"
 #include "ui/components/TextLabel.h"
+#include "ui/components/SelectionRectangle.h"
 #include "ui/FontEngine.h"
 #include "ui/KnobSkin.hpp"
 #include "dsp/AnalyzerDefs.h"
@@ -74,6 +75,10 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
 
+    Font fontAwesome;
+    fontAwesome.name = "awesome";
+    fontAwesome.size = 16.0;
+    fontAwesome.color = {0xff, 0xff, 0xff, 0xff};
     Font fontLabel;
     fontLabel.name = "regular";
     fontLabel.size = 12.0;
@@ -124,6 +129,52 @@ UISpectralAnalyzer::UISpectralAnalyzer()
             { return std::to_string((int)(value * 1e3)) + " ms"; };
         fSetupWindow->moveAlong(fReleaseTimeSlider);
     }
+
+    fScaleWindow = makeSubwidget<FloatingWindow>(this);
+    fScaleWindow->setVisible(false);
+    fScaleWindow->setSize(150, 70);
+    {
+        int y = 10;
+
+        TextLabel *label;
+
+        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label->setText("\uf8cc");
+        label->setFont(fontAwesome);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fScaleWindow->moveAlong(label);
+
+        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label->setText("left: select zoom region");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(30, y);
+        label->setSize(100, 20);
+        fScaleWindow->moveAlong(label);
+
+        y += 30;
+
+        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label->setText("\uf8cc");
+        label->setFont(fontAwesome);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fScaleWindow->moveAlong(label);
+
+        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label->setText("right: reset zoom");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(30, y);
+        label->setSize(100, 20);
+        fScaleWindow->moveAlong(label);
+    }
+
+    fSelectionRectangle = makeSubwidget<SelectionRectangle>(this);
+    fSelectionRectangle->setVisible(false);
 
     uiReshape(getWidth(), getHeight());
 }
@@ -204,25 +255,101 @@ void UISpectralAnalyzer::onDisplay()
 {
 }
 
+bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
+{
+    if (fMode == kModeScale && ev.press && ev.button == 1) {
+        fSelectionRectangle->setVisible(true);
+        fSelectionRectangle->setAbsolutePos(ev.pos);
+        fSelectionRectangle->setSize(0, 0);
+        fScaleRectDragging = true;
+        return true;
+    }
+    if (fMode == kModeScale && fScaleRectDragging && !ev.press && ev.button == 1) {
+        fSelectionRectangle->setVisible(false);
+        fScaleRectDragging = false;
+        int x1 = fSelectionRectangle->getAbsoluteX() - fSpectrumView->getAbsoluteX();
+        int x2 = x1 + (int)fSelectionRectangle->getWidth();
+        int y1 = fSelectionRectangle->getAbsoluteY() - fSpectrumView->getAbsoluteY();
+        int y2 = y1 + (int)fSelectionRectangle->getHeight();
+        if (x1 != x2 && y1 != y2) {
+            double key1 = fSpectrumView->keyOfX(x1);
+            double key2 = fSpectrumView->keyOfX(x2);
+            double db1 = fSpectrumView->dbMagOfY(y1);
+            double db2 = fSpectrumView->dbMagOfY(y2);
+            if (key1 > key2)
+                std::swap(key1, key2);
+            if (db1 > db2)
+                std::swap(db1, db2);
+            fSpectrumView->setKeyScale(key1, key2);
+            fSpectrumView->setDbScale(db1, db2);
+        }
+        return true;
+    }
+    if (fMode == kModeScale && ev.press && ev.button == 3) {
+        fSpectrumView->setDefaultScales();
+        return true;
+    }
+
+    return false;
+}
+
+bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
+{
+    if (fScaleRectDragging) {
+        fSelectionRectangle->setSize(
+            ev.pos.getX() - fSelectionRectangle->getAbsoluteX(),
+            ev.pos.getY() - fSelectionRectangle->getAbsoluteY());
+    }
+
+    return false;
+}
+
 // -----------------------------------------------------------------------
 
 void UISpectralAnalyzer::onToolBarItemClicked(int id)
 {
+    int floatingPosX = 4;
+    int floatingPosY = fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4;
+
     switch (id) {
     case kToolBarIdSetup:
-        if (fSetupWindow->isVisible())
+        fMode = kModeNormal;
+
+        fScaleWindow->setVisible(false);
+        fMainToolBar->setSelected(kToolBarIdScale, false);
+
+        if (fSetupWindow->isVisible()) {
             fSetupWindow->setVisible(false);
+            fMainToolBar->setSelected(kToolBarIdSetup, false);
+        }
         else {
             fSetupWindow->setVisible(true);
-            fSetupWindow->setAbsolutePos(
-                4, fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4);
+            fMainToolBar->setSelected(kToolBarIdSetup, true);
+            fSetupWindow->setAbsolutePos(floatingPosX, floatingPosY);
         }
         break;
     case kToolBarIdScale:
-        //
+        fMode = kModeNormal;
+
+        fSetupWindow->setVisible(false);
+        fMainToolBar->setSelected(kToolBarIdSetup, false);
+
+        if (fScaleWindow->isVisible()) {
+            fScaleWindow->setVisible(false);
+            fMainToolBar->setSelected(kToolBarIdScale, false);
+        }
+        else {
+            fMode = kModeScale;
+            fScaleRectDragging = false;
+
+            fScaleWindow->setVisible(true);
+            fMainToolBar->setSelected(kToolBarIdScale, true);
+            fScaleWindow->setAbsolutePos(floatingPosX, floatingPosY);
+        }
         break;
     case kToolBarIdFreeze:
         fSpectrumView->toggleFreeze();
+        fMainToolBar->setSelected(kToolBarIdFreeze, fSpectrumView->isFrozen());
         break;
     }
 }

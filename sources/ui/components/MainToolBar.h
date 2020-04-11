@@ -10,6 +10,7 @@ class MainToolBar : public Widget {
 public:
     MainToolBar(Widget *group, FontEngine &fontEngine);
     void addButton(int id, const char *label, const char *icon);
+    void setSelected(int id, bool sel);
     float getIdealWidth() const;
 
     class Listener {
@@ -34,6 +35,7 @@ private:
         int type = 0;
         std::string label;
         std::string icon;
+        bool selected = false;
     };
 
     enum ItemType {

@@ -22,6 +22,21 @@ void MainToolBar::addButton(int id, const char *label, const char *icon)
     repaint();
 }
 
+void MainToolBar::setSelected(int id, bool sel)
+{
+    Item *item = nullptr;
+
+    for (size_t i = 0, n = fLayout.size(); i < n && !item; ++i) {
+        if (fLayout[i].id == id)
+            item = &fLayout[i];
+    }
+
+    if (item && item->selected != sel) {
+        item->selected = sel;
+        repaint();
+    }
+}
+
 float MainToolBar::getIdealWidth() const
 {
     if (fLayout.empty())
@@ -52,14 +67,20 @@ void MainToolBar::onDisplay()
     fontIcons.size = h - 1.5 * fontLabel.size;
     fontIcons.color = {0xff, 0xff, 0xff, 0xff};
 
+    Font fontLabelSelected = fontLabel;
+    Font fontIconsSelected = fontIcons;
+    const ColorRGBA8 selectionColor = {0xff, 0xaa, 0x00, 0xff};
+    fontLabelSelected.color = selectionColor;
+    fontIconsSelected.color = selectionColor;
+
     for (size_t i = 0, n = fLayout.size(); i < n; ++i) {
         const Item &item = fLayout[i];
         RectF rect = fItemRects[i];
 
         switch (item.type) {
         case kTypeIcon:
-            fe.drawInBox(cr, item.icon.c_str(), fontIcons, rect, kAlignCenter|kAlignTop|kAlignInside);
-            fe.drawInBox(cr, item.label.c_str(), fontLabel, rect, kAlignCenter|kAlignBottom|kAlignInside);
+            fe.drawInBox(cr, item.icon.c_str(), !item.selected ? fontIcons : fontIconsSelected, rect, kAlignCenter|kAlignTop|kAlignInside);
+            fe.drawInBox(cr, item.label.c_str(), !item.selected ? fontLabel : fontLabelSelected, rect, kAlignCenter|kAlignBottom|kAlignInside);
             break;
         }
     }

@@ -12,19 +12,29 @@ public:
 
     void setData(const float *frequencies, const float *magnitudes, uint32_t size, uint32_t numChannels);
     void toggleFreeze();
+    bool isFrozen() const { return fFreeze; }
+
+    void setKeyScale(float keyMin, float keyMax);
+    void setDbScale(float dbMin, float dbMax);
+    void setDefaultScales();
 
     void onDisplay() override;
 
-private:
-    void displayBack();
-
+public:
+    // coordinate <-> unit conversion
+    double keyOfX(double x) const;
+    double keyOfR(double r) const;
     double frequencyOfX(double x) const;
     double frequencyOfR(double r) const;
     double rOfFrequency(double f) const;
     double xOfFrequency(double f) const;
-
+    double dbMagOfY(double y) const;
+    double dbMagOfR(double r) const;
     double rOfDbMag(double m) const;
     double yOfDbMag(double m) const;
+
+private:
+    void displayBack();
 
 private:
     FontEngine &fFontEngine;
@@ -41,13 +51,19 @@ private:
     uint32_t fFreezeSize = 0;
     uint32_t fFreezeNumChannels = 0;
 
+    // scale defaults
+    static constexpr float kdBminDefault = -120.0;
+    static constexpr float kdBmaxDefault = +0.0;
+    static constexpr float kKeyMinDefault = 24.0;
+    static constexpr float kKeyMaxDefault = 127.0;
+
     // vertical scale (dB)
-    float fdBmin = -120.0;
-    float fdBmax = +0.0;
+    float fdBmin = kdBminDefault;
+    float fdBmax = kdBmaxDefault;
 
     // horizontal scale (key)
-    int32_t fKeyMin = 24.0f;
-    int32_t fKeyMax = 127.0f;
+    float fKeyMin = kKeyMinDefault;
+    float fKeyMax = kKeyMaxDefault;
 
     // interpolation
     Spline fSpline;
