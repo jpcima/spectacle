@@ -102,11 +102,13 @@ res: $(foreach r,$(FILES_RES),$(BUILD_DIR)/res/$(r))
 
 $(BUILD_DIR)/res/%.h: ../../resources/%.gz
 	mkdir -p $(dir $@)
-	zcat $^ | xxd -i > $@
+	zcat $^ | xxd -i > $@.tmp
+	mv -f $@.tmp $@
 
 $(BUILD_DIR)/res/%.h: ../../resources/%
 	mkdir -p $(dir $@)
-	cat $^ | xxd -i > $@
+	cat $^ | xxd -i > $@.tmp
+	mv -f $@.tmp $@
 
 # --------------------------------------------------------------
 # Enable all selected plugin types
