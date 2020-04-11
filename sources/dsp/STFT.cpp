@@ -126,7 +126,7 @@ fftwf_plan STFT::prepareFFT(uint32_t fftSize)
     fftwf_real_vector real(fftSize);
     fftwf_complex_vector cpx(fftSize / 2 + 1);
 
-    constexpr int planFlags = FFTW_ESTIMATE; // FFTW_MEASURE
+    constexpr int planFlags = FFTW_MEASURE; // set FFTW_ESTIMATE for fast startup
     fftwf_plan plan = fftwf_plan_dft_r2c_1d(fftSize, real.data(), (fftwf_complex *)cpx.data(), planFlags);
     _fftPlans[fftSize] = fftwf_plan_u(plan);
     return plan;
