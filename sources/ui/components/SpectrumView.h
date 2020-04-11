@@ -18,12 +18,17 @@ public:
     void setDbScale(float dbMin, float dbMax);
     void setDefaultScales();
 
+    void clearReferenceLine();
+    void setReferenceLine(float key, float db);
+
     void onDisplay() override;
 
 public:
     // coordinate <-> unit conversion
     double keyOfX(double x) const;
     double keyOfR(double r) const;
+    double xOfKey(double k) const;
+    double rOfKey(double k) const;
     double frequencyOfX(double x) const;
     double frequencyOfR(double r) const;
     double rOfFrequency(double f) const;
@@ -69,6 +74,11 @@ private:
     // horizontal scale (key)
     float fKeyMin = kKeyMinDefault;
     float fKeyMax = kKeyMaxDefault;
+
+    // reference line
+    bool fHaveReferenceLine = false;
+    float fKeyRef = 0;
+    float fdBref = 0;
 
     // interpolation
     Spline fSpline;

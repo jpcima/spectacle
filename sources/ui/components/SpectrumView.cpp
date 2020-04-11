@@ -53,6 +53,26 @@ void SpectrumView::setDefaultScales()
     setDbScale(kdBminDefault, kdBmaxDefault);
 }
 
+void SpectrumView::clearReferenceLine()
+{
+    if (!fHaveReferenceLine)
+        return;
+
+    fHaveReferenceLine = false;
+    repaint();
+}
+
+void SpectrumView::setReferenceLine(float key, float db)
+{
+    if (fHaveReferenceLine && fKeyRef == key && fdBref == db)
+        return;
+
+    fHaveReferenceLine = true;
+    fKeyRef = key;
+    fdBref = db;
+    repaint();
+}
+
 void SpectrumView::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
@@ -112,6 +132,22 @@ void SpectrumView::onDisplay()
         cairo_line_to(cr, points.front().x, height);
         cairo_set_source_rgba(cr, color.red, color.green, color.blue, 0.1f);
         cairo_fill(cr);
+    }
+
+    ///
+    if (fHaveReferenceLine) {
+        const double x = xOfKey(fKeyRef);
+        const double y = yOfDbMag(fdBref);
+        cairo_set_line_width(cr, 1.0);
+        //cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.2);
+        cairo_set_source_rgba8(cr, {0xff, 0xaa, 0x00, 0x40});
+        cairo_new_path(cr);
+        cairo_move_to(cr, 0, (int)y + 0.5);
+        cairo_line_to(cr, width, (int)y + 0.5);
+        cairo_stroke(cr);
+        cairo_move_to(cr, (int)x + 0.5, 0);
+        cairo_line_to(cr, (int)x + 0.5, height);
+        cairo_stroke(cr);
     }
 
     ///
@@ -186,6 +222,16 @@ double SpectrumView::keyOfX(double x) const
 double SpectrumView::keyOfR(double r) const
 {
     return r * (fKeyMax - fKeyMin) + fKeyMin;
+}
+
+double SpectrumView::xOfKey(double k) const
+{
+    return rOfKey(k) * getWidth();
+}
+
+double SpectrumView::rOfKey(double k) const
+{
+    return (k - fKeyMin) / (fKeyMax - fKeyMin);
 }
 
 double SpectrumView::frequencyOfX(double x) const

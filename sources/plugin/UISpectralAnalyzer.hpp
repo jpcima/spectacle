@@ -62,6 +62,8 @@ protected:
     void onToolBarItemClicked(int id) override;
 
 private:
+    void switchMode(int mode);
+
     void updateSpectrum();
 
     template <class W, class... A>
@@ -98,7 +100,9 @@ private:
 
     enum {
         kModeNormal,
+        kModeSetup,
         kModeScale,
+        kModeSelect,
     };
 
     int fMode = kModeNormal;

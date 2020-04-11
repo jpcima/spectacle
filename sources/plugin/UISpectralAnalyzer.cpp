@@ -52,6 +52,7 @@ enum {
     kToolBarIdSetup = 1,
     kToolBarIdScale,
     kToolBarIdFreeze,
+    kToolBarIdSelect,
 };
 
 // -----------------------------------------------------------------------
@@ -71,6 +72,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fMainToolBar->addButton(kToolBarIdSetup, "Setup", "\uf085");
     fMainToolBar->addButton(kToolBarIdScale, "Scale", "\uf0b2");
     fMainToolBar->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
+    fMainToolBar->addButton(kToolBarIdSelect, "Select", "\uf05b");
     fMainToolBar->setListener(this);
 
     fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
@@ -295,10 +297,19 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
 
 bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
 {
-    if (fScaleRectDragging) {
-        fSelectionRectangle->setSize(
-            ev.pos.getX() - fSelectionRectangle->getAbsoluteX(),
-            ev.pos.getY() - fSelectionRectangle->getAbsoluteY());
+    switch (fMode) {
+    case kModeScale:
+        if (fScaleRectDragging) {
+            fSelectionRectangle->setSize(
+                ev.pos.getX() - fSelectionRectangle->getAbsoluteX(),
+                ev.pos.getY() - fSelectionRectangle->getAbsoluteY());
+        }
+        break;
+    case kModeSelect:
+        fSpectrumView->setReferenceLine(
+            fSpectrumView->keyOfX(ev.pos.getX() - fSelectionRectangle->getAbsoluteX()),
+            fSpectrumView->dbMagOfY(ev.pos.getY() - fSelectionRectangle->getAbsoluteY()));
+        break;
     }
 
     return false;
@@ -308,53 +319,69 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
 
 void UISpectralAnalyzer::onToolBarItemClicked(int id)
 {
-    int floatingPosX = 4;
-    int floatingPosY = fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4;
-
     switch (id) {
     case kToolBarIdSetup:
-        fMode = kModeNormal;
-
-        fScaleWindow->setVisible(false);
-        fMainToolBar->setSelected(kToolBarIdScale, false);
-
-        if (fSetupWindow->isVisible()) {
-            fSetupWindow->setVisible(false);
-            fMainToolBar->setSelected(kToolBarIdSetup, false);
-        }
-        else {
-            fSetupWindow->setVisible(true);
-            fMainToolBar->setSelected(kToolBarIdSetup, true);
-            fSetupWindow->setAbsolutePos(floatingPosX, floatingPosY);
-        }
+        switchMode((fMode == kModeSetup) ? kModeNormal : kModeSetup);
         break;
     case kToolBarIdScale:
-        fMode = kModeNormal;
-
-        fSetupWindow->setVisible(false);
-        fMainToolBar->setSelected(kToolBarIdSetup, false);
-
-        if (fScaleWindow->isVisible()) {
-            fScaleWindow->setVisible(false);
-            fMainToolBar->setSelected(kToolBarIdScale, false);
-        }
-        else {
-            fMode = kModeScale;
-            fScaleRectDragging = false;
-
-            fScaleWindow->setVisible(true);
-            fMainToolBar->setSelected(kToolBarIdScale, true);
-            fScaleWindow->setAbsolutePos(floatingPosX, floatingPosY);
-        }
+        switchMode((fMode == kModeScale) ? kModeNormal : kModeScale);
         break;
     case kToolBarIdFreeze:
         fSpectrumView->toggleFreeze();
         fMainToolBar->setSelected(kToolBarIdFreeze, fSpectrumView->isFrozen());
         break;
+    case kToolBarIdSelect:
+        switchMode((fMode == kModeSelect) ? kModeNormal : kModeSelect);
+        break;
     }
 }
 
 // -----------------------------------------------------------------------
+
+void UISpectralAnalyzer::switchMode(int mode)
+{
+    int prevMode = fMode;
+    if (mode == prevMode)
+        return;
+
+    fMode = mode;
+
+    fSetupWindow->setVisible(false);
+    fScaleWindow->setVisible(false);
+    fMainToolBar->setSelected(kToolBarIdSetup, false);
+    fMainToolBar->setSelected(kToolBarIdScale, false);
+    fMainToolBar->setSelected(kToolBarIdSelect, false);
+
+    const int floatingPosX = 4;
+    const int floatingPosY = fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4;
+
+    switch (prevMode) {
+    case kModeScale:
+        fScaleRectDragging = false;
+        break;
+    case kModeSelect:
+        fSpectrumView->clearReferenceLine();
+        break;
+    }
+
+    switch (mode) {
+    case kModeSetup:
+        fSetupWindow->setVisible(true);
+        fSetupWindow->setAbsolutePos(floatingPosX, floatingPosY);
+        fMainToolBar->setSelected(kToolBarIdSetup, fMode == kModeSetup);
+        break;
+    case kModeScale:
+        fScaleWindow->setVisible(true);
+        fScaleWindow->setAbsolutePos(floatingPosX, floatingPosY);
+        fMainToolBar->setSelected(kToolBarIdScale, fMode == kModeScale);
+        fScaleRectDragging = false;
+        break;
+    case kModeSelect:
+        fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
+        fSpectrumView->clearReferenceLine();
+        break;
+    }
+}
 
 void UISpectralAnalyzer::updateSpectrum()
 {
