@@ -37,19 +37,24 @@ private:
     void displayBack();
 
 private:
+    struct Memory;
+    const Memory &getDisplayMemory() const { return fFreeze ? fFreezeMemory : fActiveMemory; }
+
+private:
     FontEngine &fFontEngine;
 
-    std::vector<float> fFrequencies;
-    std::vector<float> fMagnitudes;
-    uint32_t fSize = 0;
-    uint32_t fNumChannels = 0;
+    struct Memory {
+        uint32_t size;
+        uint32_t numChannels;
+        std::vector<float> frequencies;
+        std::vector<float> magnitudes;
+    };
+
+    Memory fActiveMemory;
 
     // freeze mode
     bool fFreeze = false;
-    std::vector<float> fFreezeFrequencies;
-    std::vector<float> fFreezeMagnitudes;
-    uint32_t fFreezeSize = 0;
-    uint32_t fFreezeNumChannels = 0;
+    Memory fFreezeMemory;
 
     // scale defaults
     static constexpr float kdBminDefault = -120.0;

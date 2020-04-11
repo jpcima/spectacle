@@ -13,19 +13,17 @@ SpectrumView::SpectrumView(Widget *parent, FontEngine &fontEngine)
 
 void SpectrumView::setData(const float *frequencies, const float *magnitudes, uint32_t size, uint32_t numChannels)
 {
-    fFrequencies.assign(frequencies, frequencies + size * numChannels);
-    fMagnitudes.assign(magnitudes, magnitudes + size * numChannels);
-    fSize = size;
-    fNumChannels = numChannels;
+    Memory &mem = fActiveMemory;
+    mem.frequencies.assign(frequencies, frequencies + size * numChannels);
+    mem.magnitudes.assign(magnitudes, magnitudes + size * numChannels);
+    mem.size = size;
+    mem.numChannels = numChannels;
     repaint();
 }
 
 void SpectrumView::toggleFreeze()
 {
-    fFreezeFrequencies = fFrequencies;
-    fFreezeMagnitudes = fMagnitudes;
-    fFreezeSize = fSize;
-    fFreezeNumChannels = fNumChannels;
+    fFreezeMemory = fActiveMemory;
     fFreeze = !fFreeze;
 }
 
@@ -68,9 +66,9 @@ void SpectrumView::onDisplay()
     displayBack();
 
     ///
-    const bool freeze = fFreeze;
-    const uint32_t size = freeze ? fFreezeSize : fSize;
-    const uint32_t numChannels = freeze ? fFreezeNumChannels : fNumChannels;
+    const Memory &mem = getDisplayMemory();
+    const uint32_t size = mem.size;
+    const uint32_t numChannels = mem.numChannels;
     Spline &spline = fSpline;
 
     if (size < 4) // need more elements for interpolation
@@ -82,8 +80,8 @@ void SpectrumView::onDisplay()
 
     ///
     for (uint32_t channel = 0; channel < numChannels; ++channel) {
-        const float *rawFrequencies = freeze ? &fFreezeFrequencies[channel * size] : &fFrequencies[channel * size];
-        const float *rawMagnitudes = freeze ? &fFreezeMagnitudes[channel * size] : &fMagnitudes[channel * size];
+        const float *rawFrequencies = &mem.frequencies[channel * size];
+        const float *rawMagnitudes = &mem.magnitudes[channel * size];
 
         ///
         spline.setup(rawFrequencies, rawMagnitudes, size);
