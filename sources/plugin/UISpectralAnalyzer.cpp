@@ -337,6 +337,10 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
         fSpectrumView->setDefaultScales();
         return true;
     }
+    else if (fMode == kModeSelect && ev.press && ev.button == 1) {
+        fSelectPositionFixed = !fSelectPositionFixed;
+        return true;
+    }
 
     return false;
 }
@@ -352,7 +356,7 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
         }
         break;
     case kModeSelect:
-        {
+        if (!fSelectPositionFixed) {
             const double key = fSpectrumView->keyOfX(ev.pos.getX() - fSpectrumView->getAbsoluteX());
             const double mag = fSpectrumView->dbMagOfY(ev.pos.getY() - fSpectrumView->getAbsoluteY());
             const double freq = 440.0 * std::exp2((key - 69.0) * (1.0 / 12.0));
@@ -432,6 +436,7 @@ void UISpectralAnalyzer::switchMode(int mode)
         fSelectWindow->setVisible(true);
         fSelectWindow->setAbsolutePos(floatingPosX, floatingPosY);
         fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
+        fSelectPositionFixed = false;
         fSpectrumView->clearReferenceLine();
         break;
     }

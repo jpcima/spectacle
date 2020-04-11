@@ -91,6 +91,7 @@ private:
     FloatingWindow *fSelectWindow = nullptr;
     TextLabel *fSelectLabelX = nullptr;
     TextLabel *fSelectLabelY = nullptr;
+    bool fSelectPositionFixed = false;
 
     std::unique_ptr<KnobSkin> fSkinKnob;
 
