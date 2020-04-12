@@ -98,11 +98,11 @@ SpectrumView::Peak SpectrumView::findNearbyPeakOnDisplay(uint32_t channel, doubl
         // narrow peak down by repeated spline evaluations
         constexpr uint32_t numEvaluations = 8;
 
-        int32_t left = std::max(0, near - 1);
-        int32_t right = std::min((int32_t)size - 1, near + 1);
+        const int32_t left = std::max(0, near - 1);
+        const int32_t right = std::min((int32_t)size - 1, near + 1);
+        double f1 = 0.5 * (spline.getX(near) + spline.getX(left));
+        double f2 = 0.5 * (spline.getX(near) + spline.getX(right));
 
-        double f1 = spline.getX(left);
-        double f2 = spline.getX(right);
         double f = 0.5 * (f1 + f2);
         double m = spline.interpolate(f);
         for (uint32_t i = 0; i < numEvaluations; ++i) {
