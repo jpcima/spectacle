@@ -108,8 +108,8 @@ DGL::Point<int> FloatingWindow::restrictWithinLimits(DGL::Point<int> pos)
     if (lw == 0 || lh == 0)
         return pos;
 
-    x = std::max(lx, std::min(lx + (int)lw - (int)w, x));
-    y = std::max(ly, std::min(ly + (int)lh - (int)h, y));
+    x = std::max(lx - (int)(w / 2), std::min(lx + (int)lw - (int)(w / 2), x));
+    y = std::max(ly - (int)(h / 2), std::min(ly + (int)lh - (int)(h / 2), y));
 
     return DGL::Point<int>(x, y);
 }
