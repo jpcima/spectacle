@@ -413,6 +413,7 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
 
     for (FloatingWindow *win : floats) {
         win->setMoveLimits(getAbsolutePos(), getSize());
+        // TODO(jpc) I'd rather move the window relative to nearest corner
         win->repositionWithinLimits();
     }
 }
