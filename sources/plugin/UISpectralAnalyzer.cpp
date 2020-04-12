@@ -38,6 +38,7 @@
 #include "dsp/AnalyzerDefs.h"
 #include "util/format_string.h"
 #include "Window.hpp"
+#include "Color.hpp"
 
 static constexpr uint8_t fontRegular[] = {
     #include "fonts/liberation/LiberationSans-Regular.ttf.h"
@@ -86,6 +87,18 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fontLabel.name = "regular";
     fontLabel.size = 12.0;
     fontLabel.color = {0xff, 0xff, 0xff, 0xff};
+    Font fontChNLabel[kNumChannels];
+    Font fontChNAwesome[kNumChannels];
+    for (uint32_t c = 0; c < kNumChannels; ++c) {
+        fontChNLabel[c] = fontLabel;
+        fontChNAwesome[c] = fontAwesome;
+        auto wrap = [](double x) { return x - (long)x; };
+        Color cc = Color::fromHSL(wrap(0.5 + c / 3.0), 0.8, 0.5);
+        fontChNLabel[c].color.r = std::max(0, std::min(0xff, int(0xff * cc.red)));
+        fontChNLabel[c].color.g = std::max(0, std::min(0xff, int(0xff * cc.green)));
+        fontChNLabel[c].color.b = std::max(0, std::min(0xff, int(0xff * cc.blue)));
+        fontChNAwesome[c].color = fontChNLabel[c].color;
+    }
 
     fSetupWindow = makeSubwidget<FloatingWindow>(this);
     fSetupWindow->setVisible(false);
@@ -178,17 +191,28 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fSelectWindow = makeSubwidget<FloatingWindow>(this);
     fSelectWindow->setVisible(false);
-    fSelectWindow->setSize(150, 70);
+    fSelectWindow->setSize(420, 100);
     {
+        int x = 0;
         int y = 10;
 
         TextLabel *label;
 
         label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label->setText("Cursor");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(x + 10, y);
+        label->setSize(100, 20);
+        fSelectWindow->moveAlong(label);
+
+        y += 30;
+
+        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
         label->setText("\uf337");
         label->setFont(fontAwesome);
         label->setAlignment(kAlignCenter|kAlignInside);
-        label->setAbsolutePos(5, y);
+        label->setAbsolutePos(x + 5, y);
         label->setSize(20, 20);
         fSelectWindow->moveAlong(label);
 
@@ -197,7 +221,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         //label->setText("");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
-        label->setAbsolutePos(30, y);
+        label->setAbsolutePos(x + 30, y);
         label->setSize(100, 20);
         fSelectWindow->moveAlong(label);
 
@@ -207,7 +231,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setText("\uf338");
         label->setFont(fontAwesome);
         label->setAlignment(kAlignCenter|kAlignInside);
-        label->setAbsolutePos(5, y);
+        label->setAbsolutePos(x + 5, y);
         label->setSize(20, 20);
         fSelectWindow->moveAlong(label);
 
@@ -216,9 +240,90 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         //label->setText("");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
-        label->setAbsolutePos(30, y);
+        label->setAbsolutePos(x + 30, y);
         label->setSize(100, 20);
         fSelectWindow->moveAlong(label);
+
+        y = 10;
+        x += 100;
+
+        for (unsigned c = 0; c < kNumChannels; ++c) {
+            y += 30;
+
+            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label->setText("\uf140");
+            label->setFont(fontChNAwesome[c]);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(x + 10, y);
+            label->setSize(100, 20);
+            fSelectWindow->moveAlong(label);
+
+            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            fSelectChannelY[c] = label;
+            //label->setText("");
+            label->setFont(fontChNLabel[c]);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(x + 30, y);
+            label->setSize(100, 20);
+            fSelectWindow->moveAlong(label);
+        }
+
+        y = 10;
+        x += 120;
+
+        for (unsigned c = 0; c < kNumChannels; ++c) {
+            y = 10;
+
+            if (c == 0) {
+                label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+                label->setText("Nearby peak");
+                label->setFont(fontLabel);
+                label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+                label->setAbsolutePos(x + 10, y);
+                label->setSize(100, 20);
+                fSelectWindow->moveAlong(label);
+            }
+
+            y += 30;
+
+            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label->setText("\uf140");
+            label->setFont(fontChNAwesome[c]);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(x + 10, y);
+            label->setSize(100, 20);
+            fSelectWindow->moveAlong(label);
+
+            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            fSelectNearPeakX[c] = label;
+            //label->setText("");
+            label->setFont(fontChNLabel[c]);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(x + 30, y);
+            label->setSize(100, 20);
+            fSelectWindow->moveAlong(label);
+
+            y += 30;
+
+            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label->setText("\uf140");
+            label->setFont(fontChNAwesome[c]);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(x + 10, y);
+            label->setSize(100, 20);
+            fSelectWindow->moveAlong(label);
+
+            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            fSelectNearPeakY[c] = label;
+            //label->setText("");
+            label->setFont(fontChNLabel[c]);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(x + 30, y);
+            label->setSize(100, 20);
+            fSelectWindow->moveAlong(label);
+
+            x += 100;
+        }
     }
 
     fSelectionRectangle = makeSubwidget<SelectionRectangle>(this);
@@ -360,9 +465,10 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
             const double key = fSpectrumView->keyOfX(ev.pos.getX() - fSpectrumView->getAbsoluteX());
             const double mag = fSpectrumView->dbMagOfY(ev.pos.getY() - fSpectrumView->getAbsoluteY());
             const double freq = 440.0 * std::exp2((key - 69.0) * (1.0 / 12.0));
-            fSpectrumView->setReferenceLine(key, mag);
-            fSelectLabelX->setText(format_string("%g", freq) + " Hz");
-            fSelectLabelY->setText(format_string("%g", mag) + " dB");
+            fSelectLastCursorKey = key;
+            fSelectLastCursorFreq = freq;
+            fSelectLastCursorMag = mag;
+            updateSelectModeDisplays();
         }
         break;
     }
@@ -437,6 +543,9 @@ void UISpectralAnalyzer::switchMode(int mode)
         fSelectWindow->setAbsolutePos(floatingPosX, floatingPosY);
         fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
         fSelectPositionFixed = false;
+        fSelectLastCursorKey = 0.0;
+        fSelectLastCursorFreq = 0.0;
+        fSelectLastCursorMag = 0.0;
         fSpectrumView->clearReferenceLine();
         break;
     }
@@ -454,6 +563,35 @@ void UISpectralAnalyzer::updateSpectrum()
     lock.unlock();
 
     fSpectrumView->setData(fFrequencies.data(), fMagnitudes.data(), fSize, kNumChannels);
+
+    if (fMode == kModeSelect)
+        updateSelectModeDisplays();
+}
+
+void UISpectralAnalyzer::updateSelectModeDisplays()
+{
+    auto toHzString = [](double hz) -> std::string {
+        return format_string("%.2f", hz) + " Hz";
+    };
+    auto toDbString = [](double dB) -> std::string {
+        if (dB > kStftFloorMagnitudeInDB + kNegligibleDB)
+            return format_string("%.2f", dB) + " dB";
+        else
+            return "-\u221e dB";
+    };
+
+    fSpectrumView->setReferenceLine(fSelectLastCursorKey, fSelectLastCursorMag);
+    fSelectLabelX->setText(toHzString(fSelectLastCursorFreq));
+    fSelectLabelY->setText(toDbString(fSelectLastCursorMag));
+
+    for (unsigned c = 0; c < kNumChannels; ++c) {
+        double mag = fSpectrumView->evalMagnitudeOnDisplay(c, fSelectLastCursorFreq);
+        fSelectChannelY[c]->setText(toDbString(mag));
+
+        SpectrumView::Peak pk = fSpectrumView->findNearbyPeakOnDisplay(c, fSelectLastCursorFreq);
+        fSelectNearPeakX[c]->setText(toHzString(pk.frequency));
+        fSelectNearPeakY[c]->setText(toDbString(pk.magnitude));
+    }
 }
 
 // -----------------------------------------------------------------------

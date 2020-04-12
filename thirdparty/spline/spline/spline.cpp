@@ -21,7 +21,7 @@ void Spline::setup (const float *pointsX, const float *pointsY, int numPoints)
 
     std::vector<double> b, d, a, c, l, u, z, h;
 
-    elements.resize (n);
+    elements.resize (n + 1);
 
     a.resize (n);
     b.resize (n);
@@ -58,33 +58,35 @@ void Spline::setup (const float *pointsX, const float *pointsY, int numPoints)
     }
 
     for (int i = 0; i < n; i++)
-        elements.emplace_back (pointsX[i], pointsY[i], b[i], c[i], d[i]);
+        elements[i] = Element (pointsX[i], pointsY[i], b[i], c[i], d[i]);
+    elements[n] = Element (pointsX[n], pointsY[n], 0.0, 0.0, 0.0);
 }
 
 double Spline::interpolate (double x) const noexcept
 {
-    int n = static_cast<int>(elements.size());
-    if (n == 0)
-        return 0.0;
+    int i = findElement (x);
+    return elements[i].eval (x);
+}
 
-#if 0
+int Spline::findElement (double x) const noexcept
+{
     int i;
+    int n = static_cast<int> (elements.size () - 1);
+#if 0
     for (i = 0; i < n; i++)
     {
         if (! (elements[i].x < x))
             break;
     }
-    i = std::max(0, i - 1);
 #else
-    int i;
     {
-        auto it = std::lower_bound(elements.begin(), elements.end(), x);
-        if (it != elements.end())
-            i = std::max(0, int(it - elements.begin()) - 1);
+        auto it = std::lower_bound (&elements[0], &elements[n], x);
+        if (it != &elements[n])
+            i = int (it - &elements[0]);
         else
-            i = n - 1;
+            i = n;
     }
 #endif
-
-    return elements[i].eval (x);
+    i = std::max(0, i - 1);
+    return i;
 }

@@ -4,7 +4,20 @@
 #include "Window.hpp"
 #include "Cairo.hpp"
 #include <algorithm>
+#include <cassert>
 
+///
+static double mtof(double m)
+{
+    return 440.0 * std::exp2((m - 69.0) * (1.0 / 12.0));
+}
+
+static double ftom(double f)
+{
+    return 69.0 + 12.0 * std::log2(f * (1.0 / 440.0));
+}
+
+///
 SpectrumView::SpectrumView(Widget *parent, FontEngine &fontEngine)
     : Widget(parent),
       fFontEngine(fontEngine)
@@ -18,6 +31,7 @@ void SpectrumView::setData(const float *frequencies, const float *magnitudes, ui
     mem.magnitudes.assign(magnitudes, magnitudes + size * numChannels);
     mem.size = size;
     mem.numChannels = numChannels;
+    mem.dirty = true;
     repaint();
 }
 
@@ -25,6 +39,94 @@ void SpectrumView::toggleFreeze()
 {
     fFreezeMemory = fActiveMemory;
     fFreeze = !fFreeze;
+}
+
+double SpectrumView::evalMagnitudeOnDisplay(uint32_t channel, double frequency) const
+{
+    const Memory &mem = getDisplayMemory();
+    DISTRHO_SAFE_ASSERT_RETURN(channel < mem.numChannels, 0.0);
+    const Spline &spline = mem.getSpline(channel);
+    return spline.interpolate(frequency);
+}
+
+SpectrumView::Peak SpectrumView::findNearbyPeakOnDisplay(uint32_t channel, double frequency)
+{
+    SpectrumView::Peak pk = {};
+
+    const Memory &mem = getDisplayMemory();
+    DISTRHO_SAFE_ASSERT_RETURN(channel < mem.numChannels, pk);
+
+    const uint32_t size = mem.size;
+    DISTRHO_SAFE_ASSERT_RETURN(size > 0, pk);
+
+    const Spline &spline = mem.getSpline(channel);
+
+    // fprintf(stderr, "----- New search (C=%u) -----\n", channel);
+
+    // fprintf(stderr, "Size: %u %d\n", size, spline.countElements());
+    // fprintf(stderr, "Real Middle: F=%f M=%f\n", frequency, spline.interpolate(frequency));
+
+    int32_t mid = spline.findElement(frequency);
+
+    // fprintf(stderr, "Near Middle: I=%d F=%f M=%f\n", mid, spline.getX(mid), spline.getY(mid));
+
+    int32_t direction = 0;
+    if (mid - 1 < 0)
+        direction = +1;
+    else if ((uint32_t)(mid + 1) >= size)
+        direction = -1;
+    else
+        direction = (spline.interpolate(frequency) < spline.getY(mid + 1)) ? +1 : -1;
+
+    // fprintf(stderr, "Peak direction: %d\n", direction);
+
+    auto indexValid = [size](int32_t i) {
+        return i >= 0 && (uint32_t)i < size;
+    };
+
+    int32_t near = mid;
+    while (indexValid(near + direction) && spline.getY(near + direction) >= spline.getY(near)) {
+        near += direction;
+        // fprintf(stderr, "Peak advance to: %d F=%f M=%f\n", near, spline.getX(near), spline.getY(near));
+    }
+
+    if (0) {
+        pk.frequency = spline.getX(near);
+        pk.magnitude = spline.getY(near);
+    }
+    else {
+        // narrow peak down by repeated spline evaluations
+        constexpr uint32_t numEvaluations = 8;
+
+        int32_t left = std::max(0, near - 1);
+        int32_t right = std::min((int32_t)size - 1, near + 1);
+
+        double f1 = spline.getX(left);
+        double f2 = spline.getX(right);
+        double f = 0.5 * (f1 + f2);
+        double m = spline.interpolate(f);
+        for (uint32_t i = 0; i < numEvaluations; ++i) {
+            double fc1 = 0.5 * (f + f1);
+            double mc1 = spline.interpolate(fc1);
+            if (mc1 > m) {
+                m = mc1;
+                f2 = f;
+            }
+            else {
+                double fc2 = 0.5 * (f + f2);
+                double mc2 = spline.interpolate(fc2);
+                m = mc2;
+                f1 = f;
+            }
+            f = 0.5 * (f1 + f2);
+        }
+        pk.frequency = f;
+        pk.magnitude = m;
+    }
+
+    // fprintf(stderr, "----- End search -----\n");
+
+    return pk;
 }
 
 void SpectrumView::setKeyScale(float keyMin, float keyMax)
@@ -89,7 +191,6 @@ void SpectrumView::onDisplay()
     const Memory &mem = getDisplayMemory();
     const uint32_t size = mem.size;
     const uint32_t numChannels = mem.numChannels;
-    Spline &spline = fSpline;
 
     if (size < 4) // need more elements for interpolation
         return;
@@ -100,11 +201,7 @@ void SpectrumView::onDisplay()
 
     ///
     for (uint32_t channel = 0; channel < numChannels; ++channel) {
-        const float *rawFrequencies = &mem.frequencies[channel * size];
-        const float *rawMagnitudes = &mem.magnitudes[channel * size];
-
-        ///
-        spline.setup(rawFrequencies, rawMagnitudes, size);
+        const Spline &spline = mem.getSpline(channel);
 
         ///
         auto wrap = [](double x) { return x - (long)x; };
@@ -240,13 +337,12 @@ double SpectrumView::frequencyOfX(double x) const
 
 double SpectrumView::frequencyOfR(double r) const
 {
-    return 440.0 * std::exp2((keyOfR(r) - 69.0) * (1.0 / 12.0));
+    return mtof(keyOfR(r));
 }
 
 double SpectrumView::rOfFrequency(double f) const
 {
-    double midiKey = 69.0 + 12.0 * std::log2(f * (1.0 / 440.0));
-    return (midiKey - fKeyMin) / (fKeyMax - fKeyMin);
+    return (ftom(f) - fKeyMin) / (fKeyMax - fKeyMin);
 }
 
 double SpectrumView::xOfFrequency(double f) const
@@ -272,6 +368,20 @@ double SpectrumView::rOfDbMag(double m) const
 double SpectrumView::yOfDbMag(double m) const
 {
     return (1 - rOfDbMag(m)) * getHeight();
+}
+
+Spline &SpectrumView::Memory::getSpline(uint32_t channel) const
+{
+    assert(channel < numChannels);
+
+    if (dirty) {
+        lazySpline.resize(numChannels);
+        for (uint32_t c = 0; c < numChannels; ++c)
+            lazySpline[c].setup(&frequencies[c * size], &magnitudes[c * size], size);
+        dirty = false;
+    }
+
+    return lazySpline[channel];
 }
 
 constexpr float SpectrumView::kdBminDefault;

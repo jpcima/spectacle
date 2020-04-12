@@ -13,6 +13,9 @@ public:
     void setData(const float *frequencies, const float *magnitudes, uint32_t size, uint32_t numChannels);
     void toggleFreeze();
     bool isFrozen() const { return fFreeze; }
+    double evalMagnitudeOnDisplay(uint32_t channel, double frequency) const;
+    struct Peak { double frequency; double magnitude; };
+    Peak findNearbyPeakOnDisplay(uint32_t channel, double frequency);
 
     void setKeyScale(float keyMin, float keyMax);
     void setDbScale(float dbMin, float dbMax);
@@ -53,6 +56,9 @@ private:
         uint32_t numChannels;
         std::vector<float> frequencies;
         std::vector<float> magnitudes;
+        mutable bool dirty;
+        mutable std::vector<Spline> lazySpline;
+        Spline &getSpline(uint32_t channel) const;
     };
 
     Memory fActiveMemory;
@@ -79,7 +85,4 @@ private:
     bool fHaveReferenceLine = false;
     float fKeyRef = 0;
     float fdBref = 0;
-
-    // interpolation
-    Spline fSpline;
 };

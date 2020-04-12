@@ -66,6 +66,7 @@ private:
     void switchMode(int mode);
 
     void updateSpectrum();
+    void updateSelectModeDisplays();
 
     template <class W, class... A>
     W *makeSubwidget(A &&... args)
@@ -76,6 +77,8 @@ private:
     }
 
 private:
+    enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
+
     std::unique_ptr<FontEngine> fFontEngine;
     SpectrumView *fSpectrumView = nullptr;
 
@@ -91,13 +94,17 @@ private:
     FloatingWindow *fSelectWindow = nullptr;
     TextLabel *fSelectLabelX = nullptr;
     TextLabel *fSelectLabelY = nullptr;
+    TextLabel *fSelectChannelY[kNumChannels] = {};
+    TextLabel *fSelectNearPeakX[kNumChannels] = {};
+    TextLabel *fSelectNearPeakY[kNumChannels] = {};
     bool fSelectPositionFixed = false;
+    double fSelectLastCursorKey = 0.0;
+    double fSelectLastCursorFreq = 0.0;
+    double fSelectLastCursorMag = 0.0;
 
     std::unique_ptr<KnobSkin> fSkinKnob;
 
     std::vector<std::unique_ptr<Widget>> fSubWidgets;
-
-    enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
     std::vector<float> fFrequencies;
     std::vector<float> fMagnitudes;

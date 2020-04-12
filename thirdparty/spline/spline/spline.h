@@ -19,6 +19,11 @@ public:
     void setup (const float *pointsX, const float *pointsY, int numPoints);
 
     double interpolate (double x) const noexcept;
+    int findElement (double x) const noexcept;
+    int countElements () const noexcept { return int (elements.size ()); }
+
+    double getX (int i) const noexcept { return elements[i].getX (); }
+    double getY (int i) const noexcept { return elements[i].getY (); }
 
     class Element
     {
@@ -28,14 +33,17 @@ public:
         Element (double x_, double a_, double b_, double c_, double d_)
           : x (x_), a (a_), b (b_), c (c_), d (d_) {}
 
-        double eval (double xx) const
+        double getX () const noexcept { return x; }
+        double getY () const noexcept { return a; }
+
+        double eval (double xx) const noexcept
         {
             double xix (xx - x);
             return a + b * xix + c * (xix * xix) + d * (xix * xix * xix);
         }
 
-        bool operator< (const Element& e) const { return x < e.x;   }
-        bool operator< (const double xx) const  { return x < xx;    }
+        bool operator< (const Element& e) const noexcept { return x < e.x;   }
+        bool operator< (const double xx) const noexcept  { return x < xx;    }
 
         double x = 0, a = 0, b = 0, c = 0, d = 0;
     };

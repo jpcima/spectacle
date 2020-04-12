@@ -18,3 +18,6 @@ static constexpr double kStftMaxSmoothTime = 500e-3;
 static constexpr double kStftDefaultSmoothTime = 250e-3;
 
 static constexpr double kStftFloorMagnitude = 1e-9;
+static constexpr double kStftFloorMagnitudeInDB = -180.0;
+
+static constexpr double kNegligibleDB = 0.01;
