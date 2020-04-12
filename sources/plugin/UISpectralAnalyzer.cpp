@@ -444,6 +444,8 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
     }
     else if (fMode == kModeSelect && ev.press && ev.button == 1) {
         fSelectPositionFixed = !fSelectPositionFixed;
+        if (!fSelectPositionFixed)
+            setNewSelectionPositionByMouse(ev.pos);
         return true;
     }
 
@@ -461,15 +463,8 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
         }
         break;
     case kModeSelect:
-        if (!fSelectPositionFixed) {
-            const double key = fSpectrumView->keyOfX(ev.pos.getX() - fSpectrumView->getAbsoluteX());
-            const double mag = fSpectrumView->dbMagOfY(ev.pos.getY() - fSpectrumView->getAbsoluteY());
-            const double freq = 440.0 * std::exp2((key - 69.0) * (1.0 / 12.0));
-            fSelectLastCursorKey = key;
-            fSelectLastCursorFreq = freq;
-            fSelectLastCursorMag = mag;
-            updateSelectModeDisplays();
-        }
+        if (!fSelectPositionFixed)
+            setNewSelectionPositionByMouse(ev.pos);
         break;
     }
 
@@ -549,6 +544,17 @@ void UISpectralAnalyzer::switchMode(int mode)
         fSpectrumView->clearReferenceLine();
         break;
     }
+}
+
+void UISpectralAnalyzer::setNewSelectionPositionByMouse(DGL::Point<int> pos)
+{
+    const double key = fSpectrumView->keyOfX(pos.getX() - fSpectrumView->getAbsoluteX());
+    const double mag = fSpectrumView->dbMagOfY(pos.getY() - fSpectrumView->getAbsoluteY());
+    const double freq = 440.0 * std::exp2((key - 69.0) * (1.0 / 12.0));
+    fSelectLastCursorKey = key;
+    fSelectLastCursorFreq = freq;
+    fSelectLastCursorMag = mag;
+    updateSelectModeDisplays();
 }
 
 void UISpectralAnalyzer::updateSpectrum()

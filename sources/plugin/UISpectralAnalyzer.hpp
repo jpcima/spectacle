@@ -65,6 +65,8 @@ protected:
 private:
     void switchMode(int mode);
 
+    void setNewSelectionPositionByMouse(DGL::Point<int> pos);
+
     void updateSpectrum();
     void updateSelectModeDisplays();
 
