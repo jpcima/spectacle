@@ -61,7 +61,7 @@ enum {
 // Init / Deinit
 
 UISpectralAnalyzer::UISpectralAnalyzer()
-    : UI(1200, 600)
+    : UI(800, 400)
 {
     FontEngine *fe = new FontEngine;
     fFontEngine.reset(fe);
