@@ -8,6 +8,17 @@ FloatingWindow::FloatingWindow(Widget *group)
 {
 }
 
+void FloatingWindow::setMoveLimits(DGL::Point<int> origin, DGL::Size<uint> size)
+{
+    fLimitOrigin = origin;
+    fLimitSize = size;
+}
+
+void FloatingWindow::repositionWithinLimits()
+{
+    setAbsolutePos(restrictWithinLimits(getAbsolutePos()));
+}
+
 void FloatingWindow::moveAlong(Widget *w)
 {
     DISTRHO_SAFE_ASSERT_RETURN(w != nullptr, );
@@ -75,9 +86,30 @@ bool FloatingWindow::onMotion(const MotionEvent &ev)
         int dx = curx - orig.getX();
         int dy = cury - orig.getY();
         DGL::Point<int> a = fDragStartingWindowPos;
-        setAbsolutePos(a.getX() + dx, a.getY() + dy);
+        a += DGL::Point<int>(dx, dy);
+        setAbsolutePos(restrictWithinLimits(a));
         return true;
     }
 
     return false;
+}
+
+DGL::Point<int> FloatingWindow::restrictWithinLimits(DGL::Point<int> pos)
+{
+    int x = pos.getX();
+    int y = pos.getY();
+    const uint w = getWidth();
+    const uint h = getHeight();
+    const int lx = fLimitOrigin.getX();
+    const int ly = fLimitOrigin.getY();
+    const uint lw = fLimitSize.getWidth();
+    const uint lh = fLimitSize.getHeight();
+
+    if (lw == 0 || lh == 0)
+        return pos;
+
+    x = std::max(lx, std::min(lx + (int)lw - (int)w, x));
+    y = std::max(ly, std::min(ly + (int)lh - (int)h, y));
+
+    return DGL::Point<int>(x, y);
 }

@@ -400,6 +400,21 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
 
     fMainToolBar->setAbsolutePos(0, 0);
     fMainToolBar->setSize(fMainToolBar->getIdealWidth(), 40);
+
+    FloatingWindow *floats[] = {fSetupWindow, fScaleWindow, fSelectWindow};
+
+    if (!fInitializedFloatingWindowPos) {
+        const int floatingPosX = 4;
+        const int floatingPosY = fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4;
+        for (FloatingWindow *win : floats)
+            win->setAbsolutePos(floatingPosX, floatingPosY);
+        fInitializedFloatingWindowPos = true;
+    }
+
+    for (FloatingWindow *win : floats) {
+        win->setMoveLimits(getAbsolutePos(), getSize());
+        win->repositionWithinLimits();
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -509,9 +524,6 @@ void UISpectralAnalyzer::switchMode(int mode)
     fMainToolBar->setSelected(kToolBarIdScale, false);
     fMainToolBar->setSelected(kToolBarIdSelect, false);
 
-    const int floatingPosX = 4;
-    const int floatingPosY = fMainToolBar->getAbsoluteY() + fMainToolBar->getHeight() + 4;
-
     switch (prevMode) {
     case kModeScale:
         fScaleRectDragging = false;
@@ -524,18 +536,15 @@ void UISpectralAnalyzer::switchMode(int mode)
     switch (mode) {
     case kModeSetup:
         fSetupWindow->setVisible(true);
-        fSetupWindow->setAbsolutePos(floatingPosX, floatingPosY);
         fMainToolBar->setSelected(kToolBarIdSetup, fMode == kModeSetup);
         break;
     case kModeScale:
         fScaleWindow->setVisible(true);
-        fScaleWindow->setAbsolutePos(floatingPosX, floatingPosY);
         fMainToolBar->setSelected(kToolBarIdScale, fMode == kModeScale);
         fScaleRectDragging = false;
         break;
     case kModeSelect:
         fSelectWindow->setVisible(true);
-        fSelectWindow->setAbsolutePos(floatingPosX, floatingPosY);
         fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
         fSelectPositionFixed = false;
         fSelectLastCursorKey = 0.0;

@@ -123,6 +123,8 @@ private:
 
     bool fScaleRectDragging = false;
 
+    bool fInitializedFloatingWindowPos = false;
+
 private:
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UISpectralAnalyzer)
 };
