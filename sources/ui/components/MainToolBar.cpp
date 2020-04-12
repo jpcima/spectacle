@@ -54,7 +54,7 @@ void MainToolBar::onDisplay()
     const double w = getWidth();
     const double h = getHeight();
 
-    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.5);
+    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.25);
     cairo_rounded_rectangle_with_corners(cr, RectF{0.0, 0.0, w, h}, 10.0, RectangleSE);
     cairo_fill(cr);
 
