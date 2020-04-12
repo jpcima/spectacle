@@ -19,10 +19,11 @@ void InitParameter(uint32_t index, Parameter &parameter)
         }
         break;
     case kPidReleaseTime:
-        parameter.hints = kParameterIsAutomable|kParameterIsInteger;
+        parameter.hints = kParameterIsAutomable;
         parameter.name = "Release time";
         parameter.symbol = "release_time";
         parameter.ranges = ParameterRanges(kStftDefaultSmoothTime, kStftMinSmoothTime, kStftMaxSmoothTime);
+        parameter.unit = "ms";
         break;
     }
 }

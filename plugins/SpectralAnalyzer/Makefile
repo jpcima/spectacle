@@ -50,7 +50,7 @@ NAME = spectralanalyzer
 # --------------------------------------------------------------
 # Plugin types to build
 
-BUILD_LV2 ?= false
+BUILD_LV2 ?= true
 BUILD_VST2 ?= false
 BUILD_JACK ?= true
 BUILD_DSSI ?= false

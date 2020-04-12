@@ -61,11 +61,11 @@ private:
         Spline &getSpline(uint32_t channel) const;
     };
 
-    Memory fActiveMemory;
+    Memory fActiveMemory {};
 
     // freeze mode
     bool fFreeze = false;
-    Memory fFreezeMemory;
+    Memory fFreezeMemory {};
 
     // scale defaults
     static constexpr float kdBminDefault = -120.0;
