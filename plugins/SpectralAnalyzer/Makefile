@@ -4,6 +4,8 @@
 # Created by falkTX, Christopher Arndt, and Patrick Desaulniers
 #
 
+-include ../../Makefile.ini
+
 # --------------------------------------------------------------
 # Installation directories
 
@@ -89,6 +91,10 @@ include ../../dpf/Makefile.plugins.mk
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
 BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/fontstash -Ithirdparty/stb
 LINK_FLAGS += -lfftw3f
+
+ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
+BUILD_CXX_FLAGS += -DUSE_IMPATIENT_FFT_PLANNING=1
+endif
 
 # --------------------------------------------------------------
 # Resources

@@ -1,0 +1,7 @@
+# -*- mode: makefile; -*-
+# To set custom build options, copy to Makefile.ini and edit.
+
+# Option: USE_IMPATIENT_FFT_PLANNING
+#     Define to 1 for fast, non-optimized FFT planning.
+#     Accelerates the build-run cycle when enabled.
+USE_IMPATIENT_FFT_PLANNING = 0

@@ -4,6 +4,8 @@
 # Created by falkTX, Christopher Arndt, and Patrick Desaulniers
 #
 
+-include Makefile.ini
+
 include dpf/Makefile.base.mk
 
 PLUGINS = SpectralAnalyzer
