@@ -118,6 +118,7 @@ private:
         kModeSetup,
         kModeScale,
         kModeSelect,
+        kModeHide,
     };
 
     int fMode = kModeNormal;

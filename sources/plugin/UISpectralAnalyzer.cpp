@@ -55,6 +55,7 @@ enum {
     kToolBarIdScale,
     kToolBarIdFreeze,
     kToolBarIdSelect,
+    kToolBarIdHide,
 };
 
 // -----------------------------------------------------------------------
@@ -75,6 +76,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fMainToolBar->addButton(kToolBarIdScale, "Scale", "\uf0b2");
     fMainToolBar->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
     fMainToolBar->addButton(kToolBarIdSelect, "Select", "\uf05b");
+    fMainToolBar->addButton(kToolBarIdHide, "Hide", "\uf0d0");
     fMainToolBar->setListener(this);
 
     fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
@@ -456,7 +458,7 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
         fScaleRectDragging = true;
         return true;
     }
-    if (fMode == kModeScale && fScaleRectDragging && !ev.press && ev.button == 1) {
+    else if (fMode == kModeScale && fScaleRectDragging && !ev.press && ev.button == 1) {
         fSelectionRectangle->setVisible(false);
         fScaleRectDragging = false;
         int x1 = fSelectionRectangle->getAbsoluteX() - fSpectrumView->getAbsoluteX();
@@ -477,7 +479,7 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
         }
         return true;
     }
-    if (fMode == kModeScale && ev.press && ev.button == 3) {
+    else if (fMode == kModeScale && ev.press && ev.button == 3) {
         fSpectrumView->setDefaultScales();
         return true;
     }
@@ -485,6 +487,10 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
         fSelectPositionFixed = !fSelectPositionFixed;
         if (!fSelectPositionFixed)
             setNewSelectionPositionByMouse(ev.pos);
+        return true;
+    }
+    else if (fMode == kModeHide && ev.press && ev.button == 1) {
+        switchMode(kModeNormal);
         return true;
     }
 
@@ -528,6 +534,9 @@ void UISpectralAnalyzer::onToolBarItemClicked(int id)
     case kToolBarIdSelect:
         switchMode((fMode == kModeSelect) ? kModeNormal : kModeSelect);
         break;
+    case kToolBarIdHide:
+        switchMode(kModeHide);
+        break;
     }
 }
 
@@ -555,6 +564,9 @@ void UISpectralAnalyzer::switchMode(int mode)
     case kModeSelect:
         fSpectrumView->clearReferenceLine();
         break;
+    case kModeHide:
+        fMainToolBar->setVisible(true);
+        break;
     }
 
     switch (mode) {
@@ -575,6 +587,9 @@ void UISpectralAnalyzer::switchMode(int mode)
         fSelectLastCursorFreq = 0.0;
         fSelectLastCursorMag = 0.0;
         fSpectrumView->clearReferenceLine();
+        break;
+    case kModeHide:
+        fMainToolBar->setVisible(false);
         break;
     }
 }
