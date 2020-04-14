@@ -1,5 +1,6 @@
 #pragma once
 #include "FFT_util.h"
+#include "ARFollower.h"
 #include <vector>
 #include <cstdint>
 
@@ -8,7 +9,7 @@ public:
     STFT();
     ~STFT();
 
-    void configure(uint32_t fftSize, uint32_t stepSize, double smoothTime, double sampleRate);
+    void configure(uint32_t fftSize, uint32_t stepSize, double attackTime, double releaseTime, double sampleRate);
     void clear();
     void process(const float *input, uint32_t numFrames);
 
@@ -50,5 +51,5 @@ private:
     std::vector<float> _outputMagnitudes;
 
     // smooth
-    float _smoothPole {};
+    std::vector<ARFollower> _arSmooth;
 };

@@ -18,11 +18,18 @@ void InitParameter(uint32_t index, Parameter &parameter)
             pev[i].value = 1u << (kStftMinSizeLog2 + i);
         }
         break;
+    case kPidAttackTime:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Attack time";
+        parameter.symbol = "attack_time";
+        parameter.ranges = ParameterRanges(kStftDefaultAttackTime, kStftMinAttackTime, kStftMaxAttackTime);
+        parameter.unit = "ms";
+        break;
     case kPidReleaseTime:
         parameter.hints = kParameterIsAutomable;
         parameter.name = "Release time";
         parameter.symbol = "release_time";
-        parameter.ranges = ParameterRanges(kStftDefaultSmoothTime, kStftMinSmoothTime, kStftMaxSmoothTime);
+        parameter.ranges = ParameterRanges(kStftDefaultReleaseTime, kStftMinReleaseTime, kStftMaxReleaseTime);
         parameter.unit = "ms";
         break;
     }

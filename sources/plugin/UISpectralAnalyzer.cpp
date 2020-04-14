@@ -102,7 +102,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fSetupWindow = makeSubwidget<FloatingWindow>(this);
     fSetupWindow->setVisible(false);
-    fSetupWindow->setSize(260, 70);
+    fSetupWindow->setSize(260, 100);
     {
         int y = 10;
 
@@ -128,6 +128,26 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         y += 30;
 
         label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label->setText("Attack time");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fSetupWindow->moveAlong(label);
+
+        fAttackTimeSlider = makeSubwidget<Slider>(fSetupWindow, *fe);
+        fAttackTimeSlider->setSize(150, 20);
+        fAttackTimeSlider->setAbsolutePos(100, y);
+        fAttackTimeSlider->setValueBounds(kStftMinAttackTime, kStftMaxAttackTime);
+        fAttackTimeSlider->ValueChangedCallback = [this](double value)
+            { setParameterValue(kPidAttackTime, value); };
+        fAttackTimeSlider->FormatCallback = [](double value) -> std::string
+            { return std::to_string((int)(value * 1e3)) + " ms"; };
+        fSetupWindow->moveAlong(fAttackTimeSlider);
+
+        y += 30;
+
+        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
         label->setText("Release time");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -138,7 +158,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fReleaseTimeSlider = makeSubwidget<Slider>(fSetupWindow, *fe);
         fReleaseTimeSlider->setSize(150, 20);
         fReleaseTimeSlider->setAbsolutePos(100, y);
-        fReleaseTimeSlider->setValueBounds(kStftMinSmoothTime, kStftMaxSmoothTime);
+        fReleaseTimeSlider->setValueBounds(kStftMinReleaseTime, kStftMaxReleaseTime);
         fReleaseTimeSlider->ValueChangedCallback = [this](double value)
             { setParameterValue(kPidReleaseTime, value); };
         fReleaseTimeSlider->FormatCallback = [](double value) -> std::string
@@ -353,6 +373,9 @@ void UISpectralAnalyzer::parameterChanged(uint32_t index, float value)
     switch (index) {
     case kPidFftSize:
         fFftSizeChooser->setValue(value);
+        break;
+    case kPidAttackTime:
+        fAttackTimeSlider->setValue(value);
         break;
     case kPidReleaseTime:
         fReleaseTimeSlider->setValue(value);

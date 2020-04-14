@@ -88,6 +88,7 @@ private:
 
     FloatingWindow *fSetupWindow = nullptr;
     SpinBoxChooser *fFftSizeChooser = nullptr;
+    Slider *fAttackTimeSlider = nullptr;
     Slider *fReleaseTimeSlider = nullptr;
 
     FloatingWindow *fScaleWindow = nullptr;

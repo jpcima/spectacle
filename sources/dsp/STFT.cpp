@@ -11,18 +11,19 @@ STFT::STFT()
     _real.reserve(kStftMaxSize);
     _cpx.reserve(kStftMaxSize / 2 + 1);
     _window.reserve(kStftMaxSize);
+    _arSmooth.reserve(kStftMaxSize / 2 + 1);
 
     for (uint32_t size = kStftMinSize; size <= kStftMaxSize; size <<= 1)
         prepareFFT(size);
 
-    configure(kStftDefaultSize, kStftStepSize, kStftDefaultSmoothTime, 44100.0);
+    configure(kStftDefaultSize, kStftStepSize, kStftDefaultAttackTime, kStftDefaultReleaseTime, 44100.0);
 }
 
 STFT::~STFT()
 {
 }
 
-void STFT::configure(uint32_t fftSize, uint32_t stepSize, double smoothTime, double sampleRate)
+void STFT::configure(uint32_t fftSize, uint32_t stepSize, double attackTime, double releaseTime, double sampleRate)
 {
     if (_fftSize != fftSize || _sampleRate != sampleRate) {
         _fftPlan = prepareFFT(fftSize);
@@ -34,6 +35,7 @@ void STFT::configure(uint32_t fftSize, uint32_t stepSize, double smoothTime, dou
         _window.resize(fftSize);
         _outputFrequencies.resize(fftSize / 2 + 1);
         _outputMagnitudes.resize(fftSize / 2 + 1);
+        _arSmooth.resize(fftSize / 2 + 1);
 
         float *window = _window.data();
         for (uint32_t i = 0; i < fftSize; ++i)
@@ -51,7 +53,13 @@ void STFT::configure(uint32_t fftSize, uint32_t stepSize, double smoothTime, dou
     }
 
     _stepSize = stepSize;
-    _smoothPole = std::exp(-1.0 / (smoothTime * sampleRate / stepSize));
+
+    ARFollower *ar = _arSmooth.data();
+    ar[0].init(sampleRate);
+    ar[0].setAttackTime(attackTime / stepSize);
+    ar[0].setReleaseTime(releaseTime / stepSize);
+    for (uint32_t i = 1; i < fftSize / 2 + 1; ++i)
+        ar[i].configureLike(ar[0]);
 }
 
 void STFT::clear()
@@ -62,6 +70,12 @@ void STFT::clear()
     std::fill(
         _outputMagnitudes.begin(), _outputMagnitudes.end(),
         20.0 * std::log10(kStftFloorMagnitude));
+
+    const uint32_t fftSize = _fftSize;
+
+    ARFollower *ar = _arSmooth.data();
+    for (uint32_t i = 0; i < fftSize / 2 + 1; ++i)
+        ar[i].clear();
 }
 
 void STFT::process(const float *input, uint32_t numFrames)
@@ -101,14 +115,14 @@ void STFT::processNewWindow(const float *rawInput)
     fftwf_execute_dft_r2c(plan, real, (fftwf_complex *)cpx);
 
     float *mag = _outputMagnitudes.data();
-    const float smoothPole = _smoothPole;
+    ARFollower *ar = _arSmooth.data();
     for (uint32_t i = 0; i < fftSize / 2 + 1; ++i) {
         double curMag = std::abs(cpx[i]) * (2.0f / fftSize);
         if (kOutputNoDcComponent && i == 0)
             curMag = kStftFloorMagnitude;
         if (kOutputAsDecibels)
             curMag = 20.0 * std::log10(std::max(kStftFloorMagnitude, (double)curMag));
-        mag[i] = mag[i] * smoothPole + curMag * (1.0f - smoothPole);
+        mag[i] = ar[i].compute(curMag);
     }
 }
 
