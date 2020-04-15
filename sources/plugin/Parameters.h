@@ -3,6 +3,7 @@
 
 enum {
     kPidFftSize,
+    kPidStepSize,
     kPidAttackTime,
     kPidReleaseTime,
     kParameterCount,

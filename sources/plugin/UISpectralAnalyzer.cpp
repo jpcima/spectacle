@@ -104,7 +104,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fSetupWindow = makeSubwidget<FloatingWindow>(this);
     fSetupWindow->setVisible(false);
-    fSetupWindow->setSize(260, 100);
+    fSetupWindow->setSize(260, 130);
     {
         int y = 10;
 
@@ -126,6 +126,25 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fFftSizeChooser->ValueChangedCallback = [this](int32_t value)
             { setParameterValue(kPidFftSize, value); };
         fSetupWindow->moveAlong(fFftSizeChooser);
+
+        y += 30;
+
+        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label->setText("Step");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fSetupWindow->moveAlong(label);
+
+        fStepSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, *fe);
+        fStepSizeChooser->setSize(150, 20);
+        fStepSizeChooser->setAbsolutePos(100, y);
+        for (uint32_t stepLog2 = kStftMinStepLog2; stepLog2 <= kStftMaxStepLog2; ++stepLog2)
+            fStepSizeChooser->addChoice(stepLog2, std::to_string(1u << stepLog2).c_str());
+        fStepSizeChooser->ValueChangedCallback = [this](int32_t value)
+            { setParameterValue(kPidStepSize, value); };
+        fSetupWindow->moveAlong(fStepSizeChooser);
 
         y += 30;
 
@@ -375,6 +394,9 @@ void UISpectralAnalyzer::parameterChanged(uint32_t index, float value)
     switch (index) {
     case kPidFftSize:
         fFftSizeChooser->setValue(value);
+        break;
+    case kPidStepSize:
+        fStepSizeChooser->setValue(value);
         break;
     case kPidAttackTime:
         fAttackTimeSlider->setValue(value);

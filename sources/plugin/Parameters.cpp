@@ -18,6 +18,18 @@ void InitParameter(uint32_t index, Parameter &parameter)
             pev[i].value = 1u << (kStftMinSizeLog2 + i);
         }
         break;
+    case kPidStepSize:
+        parameter.hints = kParameterIsAutomable|kParameterIsInteger;
+        parameter.name = "Step";
+        parameter.symbol = "step";
+        parameter.ranges = ParameterRanges(kStftDefaultStepLog2, kStftMinStepLog2, kStftMaxStepLog2);
+        parameter.enumValues.count = kStftNumSteps;
+        parameter.enumValues.values = pev = new ParameterEnumerationValue[kStftNumSteps];
+        for (uint32_t i = 0; i < kStftNumSteps; ++i) {
+            pev[i].label = String(1u << (kStftMinStepLog2 + i));
+            pev[i].value = 1u << (kStftMinStepLog2 + i);
+        }
+        break;
     case kPidAttackTime:
         parameter.hints = kParameterIsAutomable;
         parameter.name = "Attack time";

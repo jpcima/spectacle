@@ -11,7 +11,15 @@ static constexpr uint32_t kStftMinSize = 1u << kStftMinSizeLog2;
 static constexpr uint32_t kStftMaxSize = 1u << kStftMaxSizeLog2;
 static constexpr uint32_t kStftDefaultSize = 1u << kStftDefaultSizeLog2;
 
-static constexpr uint32_t kStftStepSize = 64;
+static constexpr uint32_t kStftMinStepLog2 = 6;
+static constexpr uint32_t kStftMaxStepLog2 = 12;
+static constexpr uint32_t kStftDefaultStepLog2 = 8;
+
+static constexpr uint32_t kStftNumSteps = 1 + kStftMaxStepLog2 - kStftMinStepLog2;
+
+static constexpr uint32_t kStftMinStep = 1u << kStftMinStepLog2;
+static constexpr uint32_t kStftMaxStep = 1u << kStftMaxStepLog2;
+static constexpr uint32_t kStftDefaultStep = 1u << kStftDefaultStepLog2;
 
 static constexpr double kStftMinAttackTime = 1e-3;
 static constexpr double kStftMaxAttackTime = 100e-3;
