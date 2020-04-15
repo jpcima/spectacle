@@ -2,6 +2,8 @@
 
 A graphical spectral analyzer
 
+![screenshot](docs/screen.png)
+
 ## Introduction
 
 Spectacle is a real-time spectral analyzer using the short-time Fourier transform, available as LV2 audio plugin and JACK client.
