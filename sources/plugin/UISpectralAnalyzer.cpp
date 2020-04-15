@@ -31,6 +31,7 @@
 #include "ui/components/SkinSlider.hpp"
 #include "ui/components/SpinBoxChooser.h"
 #include "ui/components/Slider.h"
+#include "ui/components/ColorSlider.h"
 #include "ui/components/TextLabel.h"
 #include "ui/components/SelectionRectangle.h"
 #include "ui/FontEngine.h"
@@ -56,6 +57,7 @@ enum {
     kToolBarIdFreeze,
     kToolBarIdSelect,
     kToolBarIdHide,
+    kToolBarIdColor,
 };
 
 // -----------------------------------------------------------------------
@@ -77,6 +79,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fMainToolBar->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
     fMainToolBar->addButton(kToolBarIdSelect, "Select", "\uf05b");
     fMainToolBar->addButton(kToolBarIdHide, "Hide", "\uf0d0");
+    fMainToolBar->addButton(kToolBarIdColor, "Color", "\uf53f");
     fMainToolBar->setListener(this);
 
     fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
@@ -89,17 +92,11 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fontLabel.name = "regular";
     fontLabel.size = 12.0;
     fontLabel.color = {0xff, 0xff, 0xff, 0xff};
-    Font fontChNLabel[kNumChannels];
-    Font fontChNAwesome[kNumChannels];
+
+    fColorPalette[kColorIdBackground] = 2. / 3.;
     for (uint32_t c = 0; c < kNumChannels; ++c) {
-        fontChNLabel[c] = fontLabel;
-        fontChNAwesome[c] = fontAwesome;
         auto wrap = [](double x) { return x - (long)x; };
-        Color cc = Color::fromHSL(wrap(0.5 + c / 3.0), 0.8, 0.5);
-        fontChNLabel[c].color.r = std::max(0, std::min(0xff, int(0xff * cc.red)));
-        fontChNLabel[c].color.g = std::max(0, std::min(0xff, int(0xff * cc.green)));
-        fontChNLabel[c].color.b = std::max(0, std::min(0xff, int(0xff * cc.blue)));
-        fontChNAwesome[c].color = fontChNLabel[c].color;
+        fColorPalette[c + kColorIdCh1] = wrap(0.5 + c / 3.0);
     }
 
     fSetupWindow = makeSubwidget<FloatingWindow>(this);
@@ -272,18 +269,18 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         for (unsigned c = 0; c < kNumChannels; ++c) {
             y += 30;
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeColoredLabel(fSelectWindow, c + kColorIdCh1);
             label->setText("\uf140");
-            label->setFont(fontChNAwesome[c]);
+            label->setFont(fontAwesome);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
             label->setAbsolutePos(x + 10, y);
             label->setSize(100, 20);
             fSelectWindow->moveAlong(label);
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeColoredLabel(fSelectWindow, c + kColorIdCh1);
             fSelectChannelY[c] = label;
             //label->setText("");
-            label->setFont(fontChNLabel[c]);
+            label->setFont(fontLabel);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
             label->setAbsolutePos(x + 30, y);
             label->setSize(100, 20);
@@ -308,18 +305,18 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
             y += 30;
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeColoredLabel(fSelectWindow, c + kColorIdCh1);
             label->setText("\uf140");
-            label->setFont(fontChNAwesome[c]);
+            label->setFont(fontAwesome);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
             label->setAbsolutePos(x + 10, y);
             label->setSize(100, 20);
             fSelectWindow->moveAlong(label);
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeColoredLabel(fSelectWindow, c + kColorIdCh1);
             fSelectNearPeakX[c] = label;
             //label->setText("");
-            label->setFont(fontChNLabel[c]);
+            label->setFont(fontLabel);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
             label->setAbsolutePos(x + 30, y);
             label->setSize(100, 20);
@@ -327,18 +324,18 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
             y += 30;
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeColoredLabel(fSelectWindow, c + kColorIdCh1);
             label->setText("\uf140");
-            label->setFont(fontChNAwesome[c]);
+            label->setFont(fontAwesome);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
             label->setAbsolutePos(x + 10, y);
             label->setSize(100, 20);
             fSelectWindow->moveAlong(label);
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeColoredLabel(fSelectWindow, c + kColorIdCh1);
             fSelectNearPeakY[c] = label;
             //label->setText("");
-            label->setFont(fontChNLabel[c]);
+            label->setFont(fontLabel);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
             label->setAbsolutePos(x + 30, y);
             label->setSize(100, 20);
@@ -348,8 +345,41 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         }
     }
 
+    fColorWindow = makeSubwidget<FloatingWindow>(this);
+    fColorWindow->setVisible(false);
+    fColorWindow->setSize(260, 10 + 30 * kNumColors);
+    {
+        int y = 10;
+
+        for (uint32_t colorId = 0; colorId < kNumColors; ++colorId) {
+            TextLabel *label = makeSubwidget<TextLabel>(fColorWindow, *fe);
+            label->setText(labelOfColorId(colorId));
+            label->setFont(fontLabel);
+            label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+            label->setAbsolutePos(10, y);
+            label->setSize(100, 20);
+            fColorWindow->moveAlong(label);
+
+            ColorSlider *cslider = makeSubwidget<ColorSlider>(fColorWindow);
+            cslider->setAbsolutePos(100, y);
+            cslider->setSize(150, 20);
+            fColorWindow->moveAlong(cslider);
+
+            cslider->setValue(fColorPalette[colorId]);
+
+            cslider->ValueChangedCallback = [this, colorId](double value) {
+                fColorPalette[colorId] = value;
+                updateColors();
+            };
+
+            y += 30;
+        }
+    }
+
     fSelectionRectangle = makeSubwidget<SelectionRectangle>(this);
     fSelectionRectangle->setVisible(false);
+
+    updateColors();
 
     uiReshape(getWidth(), getHeight());
 }
@@ -426,7 +456,7 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
     fMainToolBar->setAbsolutePos(0, 0);
     fMainToolBar->setSize(fMainToolBar->getIdealWidth(), 40);
 
-    FloatingWindow *floats[] = {fSetupWindow, fScaleWindow, fSelectWindow};
+    FloatingWindow *floats[] = {fSetupWindow, fScaleWindow, fSelectWindow, fColorWindow};
 
     if (!fInitializedFloatingWindowPos) {
         const int floatingPosX = 4;
@@ -537,6 +567,9 @@ void UISpectralAnalyzer::onToolBarItemClicked(int id)
     case kToolBarIdHide:
         switchMode(kModeHide);
         break;
+    case kToolBarIdColor:
+        switchMode((fMode == kModeColor) ? kModeNormal : kModeColor);
+        break;
     }
 }
 
@@ -550,12 +583,14 @@ void UISpectralAnalyzer::switchMode(int mode)
 
     fMode = mode;
 
-    fSetupWindow->setVisible(false);
-    fScaleWindow->setVisible(false);
-    fSelectWindow->setVisible(false);
+    fSetupWindow->setAllVisible(false);
+    fScaleWindow->setAllVisible(false);
+    fSelectWindow->setAllVisible(false);
+    fColorWindow->setAllVisible(false);
     fMainToolBar->setSelected(kToolBarIdSetup, false);
     fMainToolBar->setSelected(kToolBarIdScale, false);
     fMainToolBar->setSelected(kToolBarIdSelect, false);
+    fMainToolBar->setSelected(kToolBarIdColor, false);
 
     switch (prevMode) {
     case kModeScale:
@@ -571,17 +606,17 @@ void UISpectralAnalyzer::switchMode(int mode)
 
     switch (mode) {
     case kModeSetup:
-        fSetupWindow->setVisible(true);
-        fMainToolBar->setSelected(kToolBarIdSetup, fMode == kModeSetup);
+        fSetupWindow->setAllVisible(true);
+        fMainToolBar->setSelected(kToolBarIdSetup, true);
         break;
     case kModeScale:
-        fScaleWindow->setVisible(true);
-        fMainToolBar->setSelected(kToolBarIdScale, fMode == kModeScale);
+        fScaleWindow->setAllVisible(true);
+        fMainToolBar->setSelected(kToolBarIdScale, true);
         fScaleRectDragging = false;
         break;
     case kModeSelect:
-        fSelectWindow->setVisible(true);
-        fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
+        fSelectWindow->setAllVisible(true);
+        fMainToolBar->setSelected(kToolBarIdSelect, true);
         fSelectPositionFixed = false;
         fSelectLastCursorKey = 0.0;
         fSelectLastCursorFreq = 0.0;
@@ -590,6 +625,10 @@ void UISpectralAnalyzer::switchMode(int mode)
         break;
     case kModeHide:
         fMainToolBar->setVisible(false);
+        break;
+    case kModeColor:
+        fColorWindow->setAllVisible(true);
+        fMainToolBar->setSelected(kToolBarIdColor, true);
         break;
     }
 }
@@ -646,6 +685,75 @@ void UISpectralAnalyzer::updateSelectModeDisplays()
         fSelectNearPeakX[c]->setText(toHzString(pk.frequency));
         fSelectNearPeakY[c]->setText(toDbString(pk.magnitude));
     }
+}
+
+std::string UISpectralAnalyzer::labelOfColorId(uint32_t colorId)
+{
+    if (colorId == kColorIdBackground)
+        return "Background";
+    if (colorId >= kColorIdCh1 && colorId <= kColorIdChN)
+        return "Channel " + std::to_string(colorId + 1 - kColorIdCh1);
+    else
+        DISTRHO_SAFE_ASSERT_RETURN(false, "");
+}
+
+ColorRGBA8 UISpectralAnalyzer::colorHSLById(uint32_t colorId, float s, float l) const
+{
+    DISTRHO_SAFE_ASSERT_RETURN(colorId < kNumColors, {});
+
+    Color cc = Color::fromHSL(fColorPalette[colorId], s, l);
+
+    ColorRGBA8 c8;
+    c8.r = std::max(0, std::min(0xff, int(0xff * cc.red)));
+    c8.g = std::max(0, std::min(0xff, int(0xff * cc.green)));
+    c8.b = std::max(0, std::min(0xff, int(0xff * cc.blue)));
+    c8.a = 0xff;
+
+    return c8;
+}
+
+ColorRGBA8 UISpectralAnalyzer::colorHSVById(uint32_t colorId, float s, float v) const
+{
+    DISTRHO_SAFE_ASSERT_RETURN(colorId < kNumColors, {});
+
+    Color cc = Colors::fromHSV(fColorPalette[colorId], s, v);
+
+    ColorRGBA8 c8;
+    c8.r = std::max(0, std::min(0xff, int(0xff * cc.red)));
+    c8.g = std::max(0, std::min(0xff, int(0xff * cc.green)));
+    c8.b = std::max(0, std::min(0xff, int(0xff * cc.blue)));
+    c8.a = 0xff;
+
+    return c8;
+}
+
+TextLabel *UISpectralAnalyzer::makeColoredLabel(Widget *group, uint32_t colorId)
+{
+    TextLabel *label = makeSubwidget<TextLabel>(group, *fFontEngine);
+    fLabelsByColorId[colorId].push_back(label);
+    return label;
+}
+
+void UISpectralAnalyzer::updateColors()
+{
+    for (uint32_t colorId = 0; colorId < kNumColors; ++colorId) {
+        const std::vector<TextLabel *> &labels = fLabelsByColorId[colorId];
+        if (labels.empty())
+            continue;
+
+        const ColorRGBA8 c = colorHSLById(colorId, 0.8, 0.5);
+        //const ColorRGBA8 c = colorHSVById(colorId, 0.9, 0.9);
+        for (TextLabel *label : fLabelsByColorId[colorId]) {
+            Font font = label->font();
+            font.color = c;
+            label->setFont(font);
+        }
+    }
+
+    fSpectrumView->setBackgroundColor(fColorPalette[kColorIdBackground]);
+
+    for (uint32_t channel = 0; channel < kNumChannels; ++channel)
+        fSpectrumView->setChannelColor(channel, fColorPalette[channel + kColorIdCh1]);
 }
 
 // -----------------------------------------------------------------------

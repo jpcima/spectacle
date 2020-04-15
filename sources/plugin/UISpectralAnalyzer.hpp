@@ -28,6 +28,7 @@
 #include "DistrhoUI.hpp"
 #include "PluginSpectralAnalyzer.hpp"
 #include "ui/components/MainToolBar.h"
+#include "ui/Color.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -70,6 +71,10 @@ private:
     void updateSpectrum();
     void updateSelectModeDisplays();
 
+    static std::string labelOfColorId(uint32_t colorId);
+    ColorRGBA8 colorHSLById(uint32_t colorId, float s, float l) const;
+    ColorRGBA8 colorHSVById(uint32_t colorId, float s, float l) const;
+
     template <class W, class... A>
     W *makeSubwidget(A &&... args)
     {
@@ -77,6 +82,10 @@ private:
         fSubWidgets.push_back(std::unique_ptr<Widget>(w));
         return w;
     }
+
+    TextLabel *makeColoredLabel(Widget *group, uint32_t colorId);
+
+    void updateColors();
 
 private:
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
@@ -105,6 +114,8 @@ private:
     double fSelectLastCursorFreq = 0.0;
     double fSelectLastCursorMag = 0.0;
 
+    FloatingWindow *fColorWindow = nullptr;
+
     std::unique_ptr<KnobSkin> fSkinKnob;
 
     std::vector<std::unique_ptr<Widget>> fSubWidgets;
@@ -119,7 +130,18 @@ private:
         kModeScale,
         kModeSelect,
         kModeHide,
+        kModeColor,
     };
+
+    enum {
+        kColorIdBackground,
+        kColorIdCh1,
+        kColorIdChN = kColorIdCh1 + kNumChannels - 1,
+        kNumColors,
+    };
+
+    float fColorPalette[kNumColors] = {};
+    std::vector<TextLabel *> fLabelsByColorId[kNumColors];
 
     int fMode = kModeNormal;
 

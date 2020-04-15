@@ -73,6 +73,7 @@ FILES_UI = \
 	sources/ui/components/SkinSlider.cpp \
 	sources/ui/components/SpinBoxChooser.cpp \
 	sources/ui/components/Slider.cpp \
+	sources/ui/components/ColorSlider.cpp \
 	sources/ui/components/TextLabel.cpp \
 	sources/ui/components/SelectionRectangle.cpp \
 	sources/ui/KnobSkin.cpp \

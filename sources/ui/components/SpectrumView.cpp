@@ -32,6 +32,10 @@ void SpectrumView::setData(const float *frequencies, const float *magnitudes, ui
     mem.size = size;
     mem.numChannels = numChannels;
     mem.dirty = true;
+
+    if (fChannelColor.size() < numChannels)
+        fChannelColor.resize(numChannels);
+
     repaint();
 }
 
@@ -175,6 +179,22 @@ void SpectrumView::setReferenceLine(float key, float db)
     repaint();
 }
 
+void SpectrumView::setBackgroundColor(float hue)
+{
+    fBackgroundColor = hue;
+}
+
+void SpectrumView::setChannelColor(uint32_t channel, float hue)
+{
+    if (fChannelColor.size() < channel + 1)
+        fChannelColor.resize(channel + 1);
+    else if (fChannelColor[channel] == hue)
+        return;
+
+    fChannelColor[channel] = hue;
+    repaint();
+}
+
 void SpectrumView::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
@@ -204,8 +224,8 @@ void SpectrumView::onDisplay()
         const Spline &spline = mem.getSpline(channel);
 
         ///
-        auto wrap = [](double x) { return x - (long)x; };
-        const Color color = Color::fromHSL(wrap(0.5 + channel / 3.0), 0.8, 0.3);
+        const Color color = Color::fromHSL(fChannelColor[channel], 0.8, 0.3);
+        //const Color color = Colors::fromHSV(fChannelColor[channel], 0.9, 0.5);
 
         ///
         points.clear();
@@ -260,9 +280,13 @@ void SpectrumView::displayBack()
     const uint32_t height = getHeight();
 
     ///
-    cairo_set_source_rgb(cr, 0.1, 0.1, 0.2);
-    cairo_rectangle(cr, 0, 0, width, height);
-    cairo_fill(cr);
+    {
+        const Color color = Color::fromHSL(fBackgroundColor, 0.35, 0.15);
+        //const Color color = Colors::fromHSV(fBackgroundColor, 0.5, 0.2);
+        cairo_set_source_rgb(cr, color.red, color.green, color.blue);
+        cairo_rectangle(cr, 0, 0, width, height);
+        cairo_fill(cr);
+    }
 
     ///
     Font font;

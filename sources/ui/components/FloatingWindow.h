@@ -9,6 +9,7 @@ public:
     void setMoveLimits(DGL::Point<int> origin, DGL::Size<uint> size);
     void repositionWithinLimits();
     void moveAlong(Widget *w);
+    void setAllVisible(bool visible);
 
 protected:
     void onDisplay() override;

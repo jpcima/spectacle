@@ -24,6 +24,9 @@ public:
     void clearReferenceLine();
     void setReferenceLine(float key, float db);
 
+    void setBackgroundColor(float hue);
+    void setChannelColor(uint32_t channel, float hue);
+
     void onDisplay() override;
 
 public:
@@ -85,4 +88,8 @@ private:
     bool fHaveReferenceLine = false;
     float fKeyRef = 0;
     float fdBref = 0;
+
+    // color
+    float fBackgroundColor = 0;
+    std::vector<float> fChannelColor;
 };

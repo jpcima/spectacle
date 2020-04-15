@@ -12,7 +12,14 @@ void cairo_set_source_rgba8(cairo_t *cr, ColorRGBA8 c);
 struct cairo_surface_deleter;
 typedef std::unique_ptr<std::remove_pointer<cairo_surface_t>::type, cairo_surface_deleter> cairo_surface_u;
 
+struct cairo_deleter;
+typedef std::unique_ptr<std::remove_pointer<cairo_t>::type, cairo_deleter> cairo_u;
+
 ///
+struct cairo_deleter {
+    void operator()(cairo_t *x) const noexcept { cairo_destroy(x); }
+};
+
 struct cairo_surface_deleter {
     void operator()(cairo_surface_t *x) const noexcept { cairo_surface_destroy(x); }
 };
