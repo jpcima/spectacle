@@ -26,6 +26,13 @@ void FloatingWindow::moveAlong(Widget *w)
     fMoveAlong.push_back(w);
 }
 
+void FloatingWindow::setAllVisible(bool visible)
+{
+    setVisible(visible);
+    for (Widget *w : fMoveAlong)
+        w->setVisible(visible);
+}
+
 void FloatingWindow::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;

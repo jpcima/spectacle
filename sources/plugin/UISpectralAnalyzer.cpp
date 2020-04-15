@@ -550,9 +550,9 @@ void UISpectralAnalyzer::switchMode(int mode)
 
     fMode = mode;
 
-    fSetupWindow->setVisible(false);
-    fScaleWindow->setVisible(false);
-    fSelectWindow->setVisible(false);
+    fSetupWindow->setAllVisible(false);
+    fScaleWindow->setAllVisible(false);
+    fSelectWindow->setAllVisible(false);
     fMainToolBar->setSelected(kToolBarIdSetup, false);
     fMainToolBar->setSelected(kToolBarIdScale, false);
     fMainToolBar->setSelected(kToolBarIdSelect, false);
@@ -571,16 +571,16 @@ void UISpectralAnalyzer::switchMode(int mode)
 
     switch (mode) {
     case kModeSetup:
-        fSetupWindow->setVisible(true);
+        fSetupWindow->setAllVisible(true);
         fMainToolBar->setSelected(kToolBarIdSetup, fMode == kModeSetup);
         break;
     case kModeScale:
-        fScaleWindow->setVisible(true);
+        fScaleWindow->setAllVisible(true);
         fMainToolBar->setSelected(kToolBarIdScale, fMode == kModeScale);
         fScaleRectDragging = false;
         break;
     case kModeSelect:
-        fSelectWindow->setVisible(true);
+        fSelectWindow->setAllVisible(true);
         fMainToolBar->setSelected(kToolBarIdSelect, fMode == kModeSelect);
         fSelectPositionFixed = false;
         fSelectLastCursorKey = 0.0;
