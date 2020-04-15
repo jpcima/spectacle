@@ -45,7 +45,7 @@ endif
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = spectralanalyzer
+NAME = spectacle
 
 # --------------------------------------------------------------
 # Plugin types to build

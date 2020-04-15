@@ -28,8 +28,8 @@
 #define DISTRHO_PLUGIN_INFO_H
 
 #define DISTRHO_PLUGIN_BRAND "JPC"
-#define DISTRHO_PLUGIN_NAME "SpectralAnalyzer"
-#define DISTRHO_PLUGIN_URI "https://jpcima.sdf1.org/plugins/spectral-analyzer"
+#define DISTRHO_PLUGIN_NAME "Spectacle"
+#define DISTRHO_PLUGIN_URI "https://jpcima.sdf1.org/plugins/spectacle"
 
 #define DISTRHO_PLUGIN_HAS_UI 1
 #define DISTRHO_UI_USER_RESIZABLE 1

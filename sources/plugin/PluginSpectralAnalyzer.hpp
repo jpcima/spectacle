@@ -42,7 +42,7 @@ protected:
 
     const char *getLabel() const noexcept override
     {
-        return "SpectralAnalyzer";
+        return "Spectacle";
     }
 
     const char *getDescription() const override
@@ -57,7 +57,7 @@ protected:
 
     const char *getHomePage() const override
     {
-        return "https://jpcima.sdf1.org/plugins/spectral-analyzer";
+        return "https://github.com/jpcima/spectacle";
     }
 
     const char *getLicense() const noexcept override
@@ -77,7 +77,7 @@ protected:
     // Get a proper plugin UID and fill it in here!
     int64_t getUniqueId() const noexcept override
     {
-        return d_cconst('a', 'b', 'c', 'd');
+        return d_cconst('s', 'p', 'c', 't');
     }
 
     // -------------------------------------------------------------------

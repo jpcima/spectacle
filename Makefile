@@ -8,7 +8,7 @@
 
 include dpf/Makefile.base.mk
 
-PLUGINS = SpectralAnalyzer
+PLUGINS = spectacle
 
 all: libs plugins gen
 
