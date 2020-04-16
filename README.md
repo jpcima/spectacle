@@ -20,6 +20,12 @@ Spectacle is a real-time spectral analyzer using the short-time Fourier transfor
 - **attack time**: reaction delay to rapid increases of amplitude
 - **release time**: reaction delay to rapid decreases of amplitude
 
+## Change log
+
+**1.0**
+
+- initial release
+
 ## Contributors
 
 - @trebmuh, [LibraZiK](https://librazik.tuxfamily.org/): documentation
