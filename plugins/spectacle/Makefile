@@ -45,7 +45,7 @@ endif
 # --------------------------------------------------------------
 # Project name, used for binaries
 
-NAME = spectacle
+NAME = spectacle-analyzer
 
 # --------------------------------------------------------------
 # Plugin types to build
