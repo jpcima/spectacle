@@ -68,6 +68,7 @@ FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \
 	sources/plugin/Parameters.cpp \
 	sources/plugin/Config.cpp \
+	sources/plugin/ColorPalette.cpp \
 	sources/ui/components/SpectrumView.cpp \
 	sources/ui/components/MainToolBar.cpp \
 	sources/ui/components/FloatingWindow.cpp \
