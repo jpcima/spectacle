@@ -67,6 +67,7 @@ FILES_DSP = \
 FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \
 	sources/plugin/Parameters.cpp \
+	sources/plugin/Config.cpp \
 	sources/ui/components/SpectrumView.cpp \
 	sources/ui/components/MainToolBar.cpp \
 	sources/ui/components/FloatingWindow.cpp \
@@ -80,7 +81,8 @@ FILES_UI = \
 	sources/ui/Fontstash.cpp \
 	sources/ui/Cairo++.cpp \
 	sources/util/format_string.cpp \
-	thirdparty/spline/spline/spline.cpp
+	thirdparty/spline/spline/spline.cpp \
+	thirdparty/simpleini/ConvertUTF.cpp
 
 # --------------------------------------------------------------
 # Do some magic
@@ -89,7 +91,7 @@ UI_TYPE = cairo
 include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
-BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/fontstash -Ithirdparty/stb
+BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/fontstash -Ithirdparty/stb -Ithirdparty/simpleini
 LINK_FLAGS += -lfftw3f
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
