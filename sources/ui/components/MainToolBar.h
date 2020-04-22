@@ -5,10 +5,11 @@
 #include <vector>
 #include <memory>
 class FontEngine;
+class ColorPalette;
 
 class MainToolBar : public Widget {
 public:
-    MainToolBar(Widget *group, FontEngine &fontEngine);
+    MainToolBar(Widget *group, FontEngine &fontEngine, ColorPalette &palette);
     void addButton(int id, const char *label, const char *icon);
     void setSelected(int id, bool sel);
     float getIdealWidth() const;
@@ -44,6 +45,7 @@ private:
 
 private:
     FontEngine &fFontEngine;
+    ColorPalette &fPalette;
     std::vector<Item> fLayout;
     std::vector<RectF> fItemRects;
     Listener *fListener = nullptr;

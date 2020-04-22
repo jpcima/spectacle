@@ -63,17 +63,15 @@ static bool color_from_hex(const char *hex, ColorRGBA8 &color)
     return true;
 }
 
-#if 0
 static std::string hex_from_color(ColorRGBA8 color)
 {
     char rgb_string[16];
     if (color.a == 0xff)
-        sprintf(rgb_string, "#%02X%02X%02X", color.r, color.g, color.b);
+        sprintf(rgb_string, "#%02x%02x%02x", color.r, color.g, color.b);
     else
-        sprintf(rgb_string, "#%02X%02X%02X%02X", color.r, color.g, color.b, color.a);
+        sprintf(rgb_string, "#%02x%02x%02x%02x", color.r, color.g, color.b, color.a);
     return rgb_string;
 }
-#endif
 
 ///
 bool ColorPalette::load(const CSimpleIniA &ini, const char *section)
@@ -135,37 +133,51 @@ bool ColorPalette::load(const CSimpleIniA &ini, const char *section)
 
 void ColorPalette::save_defaults(CSimpleIniA &ini, const char *section, bool overwrite)
 {
-    auto fill_color = [&ini, section, overwrite](int color, const char *value) {
-        ini.SetValue(section, Colors::Name[color], value, nullptr, overwrite);
+    auto fill_color = [&ini, section, overwrite](int color, const char *value, const char *comment) {
+        ini.SetValue(section, Colors::Name[color], value, comment, overwrite);
     };
 
-    fill_color(Colors::background, "#000000");
+    fill_color(Colors::text_normal, "#ffffff", nullptr);
+    fill_color(Colors::text_active, "#ffaa00", nullptr);
 
-    fill_color(Colors::info_box_background, "text-min-brightness");
+    auto hueFromChannel = [](uint32_t channel) {
+        double h = 0.5 + channel / 3.0;
+        h -= (long)h;
+        return h;
+    };
 
-    fill_color(Colors::text_browser_foreground, "text-high-brightness");
+    for (uint32_t channel = 0; channel < DISTRHO_PLUGIN_NUM_INPUTS; ++channel) {
+        const ColorRGBA8 colorText = Colors::toRGBA8(
+            DGL::Color::fromHSL(hueFromChannel(channel), 0.8, 0.5));
+        fill_color(Colors::text_channel1 + channel, hex_from_color(colorText).c_str(), nullptr);
+    }
 
-    fill_color(Colors::metadata_label, "text-low-brightness");
-    fill_color(Colors::metadata_value, "text-high-brightness");
+    fill_color(Colors::spectrum_background, "#202033", nullptr);
 
-    fill_color(Colors::text_min_brightness, "#113355");
-    fill_color(Colors::text_low_brightness, "#3377bb");
-    fill_color(Colors::text_high_brightness, "#77aaff");
+    fill_color(Colors::spectrum_grid_text, "#4c4c4c80", nullptr);
+    fill_color(Colors::spectrum_grid_lines, "spectrum-grid-text", nullptr);
 
-    fill_color(Colors::piano_white_key, "#dddddd");
-    fill_color(Colors::piano_white_shadow, "#777777");
-    fill_color(Colors::piano_black_key, "#000000");
-    fill_color(Colors::piano_pressed_key, "#ff0000");
+    for (uint32_t channel = 0; channel < DISTRHO_PLUGIN_NUM_INPUTS; ++channel) {
+        const ColorRGBA8 colorStroke = Colors::toRGBA8(
+            DGL::Color::fromHSL(hueFromChannel(channel), 0.8, 0.3));
+        const ColorRGBA8 colorFill =
+            { colorStroke.r, colorStroke.g, colorStroke.b, 0x10 };
+        fill_color(
+            Colors::spectrum_line_channel1 + channel,
+            hex_from_color(colorStroke).c_str(), nullptr);
+        fill_color(
+            Colors::spectrum_fill_channel1 + channel,
+            hex_from_color(colorFill).c_str(), nullptr);
+    }
 
-    fill_color(Colors::digit_on, "#99aaff");
-    fill_color(Colors::digit_off, "#666666");
+    fill_color(Colors::spectrum_select_line, "#ffaa0040", nullptr);
 
-    fill_color(Colors::box_frame, "text-low-brightness");
-    fill_color(Colors::box_background, "text-min-brightness");
-    fill_color(Colors::box_title, "text-low-brightness");
-    fill_color(Colors::box_foreground, "text-high-brightness");
-    fill_color(Colors::box_foreground_secondary, "text-low-brightness");
+    fill_color(Colors::slider_back, "#262626", nullptr);
+    fill_color(Colors::slider_fill, "#404040", nullptr);
 
-    fill_color(Colors::box_active_item_background, "box-foreground");
-    fill_color(Colors::box_active_item_foreground, "box-background");
+    fill_color(Colors::spin_box_back, "slider-back", nullptr);
+    fill_color(Colors::spin_box_fill, "slider-fill", nullptr);
+
+    fill_color(Colors::floating_window_back, "#00000040", nullptr);
+    fill_color(Colors::tool_bar_back, "floating-window-back", nullptr);
 }

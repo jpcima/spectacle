@@ -4,11 +4,13 @@
 #include "ui/FontEngine.h"
 #include "ui/Geometry.h"
 #include "ui/Cairo++.h"
+#include "plugin/ColorPalette.h"
 
 ///
-Slider::Slider(Widget *group, FontEngine &fontEngine)
+Slider::Slider(Widget *group, FontEngine &fontEngine, ColorPalette &palette)
     : Widget(group),
-      fFontEngine(fontEngine)
+      fFontEngine(fontEngine),
+      fPalette(palette)
 {
 }
 
@@ -107,6 +109,7 @@ void Slider::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
     FontEngine &fe = fFontEngine;
+    const ColorPalette &cp = fPalette;
 
     //
     int w = getWidth();
@@ -125,14 +128,14 @@ void Slider::onDisplay()
     //
     const Rect bounds(0, 0, w, h);
     cairo_rounded_rectangle(cr, bounds, 10.0);
-    cairo_set_source_rgb(cr, 0.15, 0.15, 0.15);
+    cairo_set_source_rgba8(cr, cp[Colors::slider_back]);
     cairo_fill(cr);
 
     cairo_rectangle(cr, Rect{0, 0, (int)(fill * w), h});
     cairo_clip(cr);
 
     cairo_rounded_rectangle(cr, bounds, 10.0);
-    cairo_set_source_rgb(cr, 0.25, 0.25, 0.25);
+    cairo_set_source_rgba8(cr, cp[Colors::slider_fill]);
     cairo_fill(cr);
 
     cairo_reset_clip(cr);
@@ -141,7 +144,7 @@ void Slider::onDisplay()
     Font fontRegular;
     fontRegular.name = "regular";
     fontRegular.size = 12.0;
-    fontRegular.color = {0xff, 0xff, 0xff, 0xff};
+    fontRegular.color = cp[Colors::text_normal];
 
     std::string text;
     if (FormatCallback)

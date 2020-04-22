@@ -5,10 +5,11 @@
 #include <complex>
 #include <memory>
 class FontEngine;
+class ColorPalette;
 
 class SpectrumView : public Widget {
 public:
-    SpectrumView(Widget *parent, FontEngine &fontEngine);
+    SpectrumView(Widget *parent, FontEngine &fontEngine, ColorPalette &palette);
 
     void setData(const float *frequencies, const float *magnitudes, uint32_t size, uint32_t numChannels);
     void toggleFreeze();
@@ -50,6 +51,7 @@ private:
 
 private:
     FontEngine &fFontEngine;
+    ColorPalette &fColorPalette;
 
     struct Memory {
         uint32_t size;

@@ -1,14 +1,22 @@
 #include "SpinBoxChooser.h"
 #include "ui/FontEngine.h"
 #include "ui/Cairo++.h"
+#include "plugin/ColorPalette.h"
 #include "Window.hpp"
 #include "Cairo.hpp"
 
-SpinBoxChooser::SpinBoxChooser(Widget *group, FontEngine &fontEngine)
+SpinBoxChooser::SpinBoxChooser(Widget *group, FontEngine &fontEngine, ColorPalette &palette)
     : Widget(group),
-      fFontEngine(fontEngine)
+      fFontEngine(fontEngine),
+      fPalette(palette)
 {
     updateLayout();
+}
+
+void SpinBoxChooser::clearChoices()
+{
+    fChoices.clear();
+    fValueIndex = 0;
 }
 
 void SpinBoxChooser::addChoice(int32_t value, const char *text)
@@ -18,6 +26,15 @@ void SpinBoxChooser::addChoice(int32_t value, const char *text)
     else
         fChoices.emplace_back(value, std::to_string(value));
     setValueIndex(fValueIndex);
+}
+
+const std::string &SpinBoxChooser::textAtIndex(int32_t index)
+{
+    if ((uint32_t)index >= fChoices.size()) {
+        static const std::string empty;
+        return empty;
+    }
+    return fChoices[(uint32_t)index].second;
 }
 
 int32_t SpinBoxChooser::valueIndex() const
@@ -64,6 +81,7 @@ void SpinBoxChooser::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
     FontEngine &fe = fFontEngine;
+    const ColorPalette &cp = fPalette;
 
     const int h = getHeight();
 
@@ -71,27 +89,27 @@ void SpinBoxChooser::onDisplay()
     Font fontAwesome;
     fontAwesome.name = "awesome";
     fontAwesome.size = 0.5 * h;
-    fontAwesome.color = {0xff, 0xff, 0xff, 0xff};
+    fontAwesome.color = cp[Colors::text_normal];
     Font fontRegular;
     fontRegular.name = "regular";
     fontRegular.size = 12.0;
-    fontRegular.color = {0xff, 0xff, 0xff, 0xff};
+    fontRegular.color = cp[Colors::text_normal];
 
     ///
     cairo_rounded_rectangle_with_corners(cr, fBoundsLeftButton, 10.0, RectangleNW|RectangleSW);
-    cairo_set_source_rgb(cr, 0.25, 0.25, 0.25);
+    cairo_set_source_rgba8(cr, cp[Colors::spin_box_fill]);
     cairo_fill(cr);
     fe.drawInBox(cr, "\uf053", fontAwesome, fBoundsLeftButton, kAlignCenter|kAlignInside);
 
     ///
     cairo_rounded_rectangle_with_corners(cr, fBoundsRightButton, 10.0, RectangleNE|RectangleSE);
-    cairo_set_source_rgb(cr, 0.25, 0.25, 0.25);
+    cairo_set_source_rgba8(cr, cp[Colors::spin_box_fill]);
     cairo_fill(cr);
     fe.drawInBox(cr, "\uf054", fontAwesome, fBoundsRightButton, kAlignCenter|kAlignInside);
 
     ///
     cairo_rectangle(cr, fBoundsCenterLabel);
-    cairo_set_source_rgb(cr, 0.15, 0.15, 0.15);
+    cairo_set_source_rgba8(cr, cp[Colors::spin_box_back]);
     cairo_fill(cr);
     if (!fChoices.empty())
         fe.drawInBox(cr, fChoices[fValueIndex].second.c_str(), fontRegular, fBoundsCenterLabel, kAlignCenter|kAlignInside);

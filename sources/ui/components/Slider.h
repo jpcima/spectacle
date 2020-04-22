@@ -3,10 +3,11 @@
 #include <string>
 #include <functional>
 class FontEngine;
+class ColorPalette;
 
 class Slider : public Widget {
 public:
-    Slider(Widget *group, FontEngine &fontEngine);
+    Slider(Widget *group, FontEngine &fontEngine, ColorPalette &palette);
 
     double value() const noexcept { return fValue; }
     void setValue(double value);
@@ -30,6 +31,7 @@ private:
 
 private:
     FontEngine &fFontEngine;
+    ColorPalette &fPalette;
     double fValue = 0;
     double fValueBound1 = 0, fValueBound2 = 1;
     unsigned fNumSteps = 100;

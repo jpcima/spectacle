@@ -1,10 +1,12 @@
 #include "FloatingWindow.h"
 #include "ui/Cairo++.h"
+#include "plugin/ColorPalette.h"
 #include "Window.hpp"
 #include "Cairo.hpp"
 
-FloatingWindow::FloatingWindow(Widget *group)
-    : Widget(group)
+FloatingWindow::FloatingWindow(Widget *group, ColorPalette &palette)
+    : Widget(group),
+      fPalette(palette)
 {
 }
 
@@ -36,12 +38,13 @@ void FloatingWindow::setAllVisible(bool visible)
 void FloatingWindow::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
+    ColorPalette &cp = fPalette;
 
     double w = getWidth();
     double h = getHeight();
 
     cairo_rounded_rectangle(cr, RectF{0.0, 0.0, w, h}, 10.0);
-    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.25);
+    cairo_set_source_rgba8(cr, cp[Colors::floating_window_back]);
     cairo_fill(cr);
 }
 

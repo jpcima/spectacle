@@ -4,6 +4,7 @@
 #include "Geometry.h"
 #include "Cairo++.h"
 #include <cstdint>
+class ColorPalette;
 
 struct Font;
 
@@ -24,8 +25,8 @@ enum FontAlign {
 ///
 class FontEngine {
 public:
-    FontEngine();
-    FontEngine(unsigned width, unsigned height);
+    explicit FontEngine(ColorPalette &palette);
+    FontEngine(ColorPalette &palette, unsigned width, unsigned height);
     ~FontEngine();
 
     bool addFont(const char *name, const uint8_t *data, unsigned size);
@@ -42,6 +43,7 @@ private:
     static void renderDelete(void *uptr);
 
 private:
+    ColorPalette &fColorPalette;
     FONScontext_u fContext;
     cairo_surface_u fAtlas;
     cairo_t *fDrawingContext = nullptr;
@@ -51,6 +53,7 @@ private:
 struct Font {
     std::string name = "default";
     float size = 12.0;
+    int colorRef = -1;
     ColorRGBA8 color = {0x00, 0x00, 0x00, 0xff};
     float spacing = 0.0;
     float blur = 0;

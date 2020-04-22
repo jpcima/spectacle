@@ -1,12 +1,14 @@
 #include "MainToolBar.h"
 #include "ui/FontEngine.h"
 #include "ui/Cairo++.h"
+#include "plugin/ColorPalette.h"
 #include "Window.hpp"
 #include "Cairo.hpp"
 
-MainToolBar::MainToolBar(Widget *group, FontEngine &fontEngine)
+MainToolBar::MainToolBar(Widget *group, FontEngine &fontEngine, ColorPalette &palette)
     : Widget(group),
-      fFontEngine(fontEngine)
+      fFontEngine(fontEngine),
+      fPalette(palette)
 {
 }
 
@@ -50,26 +52,27 @@ void MainToolBar::onDisplay()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
     FontEngine &fe = fFontEngine;
+    const ColorPalette &cp = fPalette;
 
     const double w = getWidth();
     const double h = getHeight();
 
-    cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.25);
+    cairo_set_source_rgba8(cr, cp[Colors::tool_bar_back]);
     cairo_rounded_rectangle_with_corners(cr, RectF{0.0, 0.0, w, h}, 10.0, RectangleSE);
     cairo_fill(cr);
 
     Font fontLabel;
     fontLabel.name = "regular";
     fontLabel.size = 12.0;
-    fontLabel.color = {0xff, 0xff, 0xff, 0xff};
+    fontLabel.color = cp[Colors::text_normal];
     Font fontIcons;
     fontIcons.name = "awesome";
     fontIcons.size = h - 1.5 * fontLabel.size;
-    fontIcons.color = {0xff, 0xff, 0xff, 0xff};
+    fontIcons.color = cp[Colors::text_normal];
 
     Font fontLabelSelected = fontLabel;
     Font fontIconsSelected = fontIcons;
-    const ColorRGBA8 selectionColor = {0xff, 0xaa, 0x00, 0xff};
+    const ColorRGBA8 selectionColor = cp[Colors::text_active];
     fontLabelSelected.color = selectionColor;
     fontIconsSelected.color = selectionColor;
 

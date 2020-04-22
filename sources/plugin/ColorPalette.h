@@ -1,6 +1,7 @@
 #pragma once
 #include <SimpleIni.h>
 #include "ui/Color.h"
+#include "DistrhoPluginInfo.h"
 #include <memory>
 #include <cassert>
 
@@ -34,51 +35,48 @@ private:
 
 namespace Colors {
     enum {
-        background,
-        info_box_background,
-        text_browser_foreground,
-        metadata_label,
-        metadata_value,
-        text_min_brightness,
-        text_low_brightness,
-        text_high_brightness,
-        piano_white_key,
-        piano_white_shadow,
-        piano_black_key,
-        piano_pressed_key,
-        digit_on,
-        digit_off,
-        box_frame,
-        box_background,
-        box_title,
-        box_foreground,
-        box_foreground_secondary,
-        box_active_item_background,
-        box_active_item_foreground,
+        text_normal,
+        text_active,
+        text_channel1,
+        text_channelN = text_channel1 + DISTRHO_PLUGIN_NUM_INPUTS - 1,
+        spectrum_background,
+        spectrum_grid_text,
+        spectrum_grid_lines,
+        spectrum_line_channel1,
+        spectrum_line_channelN = spectrum_line_channel1 + DISTRHO_PLUGIN_NUM_INPUTS - 1,
+        spectrum_fill_channel1,
+        spectrum_fill_channelN = spectrum_fill_channel1 + DISTRHO_PLUGIN_NUM_INPUTS - 1,
+        spectrum_select_line,
+        slider_back,
+        slider_fill,
+        spin_box_back,
+        spin_box_fill,
+        floating_window_back,
+        tool_bar_back,
     };
 
     maybe_unused static const char *Name[] = {
-        "background",
-        "info-box-background",
-        "text-browser-foreground",
-        "metadata-label",
-        "metadata-value",
-        "text-min-brightness",
-        "text-low-brightness",
-        "text-high-brightness",
-        "piano-white-key",
-        "piano-white-shadow",
-        "piano-black-key",
-        "piano-pressed-key",
-        "digit-on",
-        "digit-off",
-        "box-frame",
-        "box-background",
-        "box-title",
-        "box-foreground",
-        "box-foreground-secondary",
-        "box-active-item-background",
-        "box-active-item-foreground",
+        "text-normal",
+        "text-active",
+        "text-channel1",
+        "text-channel2",
+        "spectrum-background",
+        "spectrum-grid-text",
+        "spectrum-grid-lines",
+        "spectrum-line-channel1",
+        "spectrum-line-channel2",
+        "spectrum-fill-channel1",
+        "spectrum-fill-channel2",
+        "spectrum-select-line",
+        "slider-back",
+        "slider-fill",
+        "spin-box-back",
+        "spin-box-fill",
+        "floating-window-back",
+        "tool-bar-back",
+        #if DISTRHO_PLUGIN_NUM_INPUTS != 2
+        #  error currently the name list assumes channels = 2
+        #endif
     };
 
     maybe_unused static constexpr size_t Count =

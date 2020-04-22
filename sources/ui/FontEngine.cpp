@@ -1,12 +1,14 @@
 #include "FontEngine.h"
+#include "plugin/ColorPalette.h"
 #include <stdexcept>
 
-FontEngine::FontEngine()
-    : FontEngine(512, 512)
+FontEngine::FontEngine(ColorPalette &palette)
+    : FontEngine(palette, 512, 512)
 {
 }
 
-FontEngine::FontEngine(unsigned width, unsigned height)
+FontEngine::FontEngine(ColorPalette &palette, unsigned width, unsigned height)
+    : fColorPalette(palette)
 {
     FONSparams params = {};
     params.width = width;
@@ -45,9 +47,11 @@ void FontEngine::draw(cairo_t *cr, const char *text, const Font &font, double x,
     if (id == FONS_INVALID)
         return;
 
+    ColorRGBA8 color = (font.colorRef == -1) ? font.color : fColorPalette[font.colorRef];
+
     fonsSetFont(ctx, id);
     fonsSetSize(ctx, font.size);
-    fonsSetColor(ctx, font.color.r | (font.color.g << 8) | (font.color.b << 16) | (font.color.a << 24));
+    fonsSetColor(ctx, color.r | (color.g << 8) | (color.b << 16) | (color.a << 24));
     fonsSetSpacing(ctx, font.spacing);
     fonsSetBlur(ctx, font.blur);
 
@@ -71,9 +75,11 @@ void FontEngine::drawInBox(cairo_t *cr, const char *text, const Font &font, cons
     if (id == FONS_INVALID)
         return;
 
+    ColorRGBA8 color = (font.colorRef == -1) ? font.color : fColorPalette[font.colorRef];
+
     fonsSetFont(ctx, id);
     fonsSetSize(ctx, font.size);
-    fonsSetColor(ctx, font.color.r | (font.color.g << 8) | (font.color.b << 16) | (font.color.a << 24));
+    fonsSetColor(ctx, color.r | (color.g << 8) | (color.b << 16) | (color.a << 24));
     fonsSetSpacing(ctx, font.spacing);
     fonsSetBlur(ctx, font.blur);
 

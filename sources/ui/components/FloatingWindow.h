@@ -1,10 +1,11 @@
 #pragma once
 #include "Widget.hpp"
 #include <vector>
+class ColorPalette;
 
 class FloatingWindow : public Widget {
 public:
-    explicit FloatingWindow(Widget *group);
+    FloatingWindow(Widget *group, ColorPalette &palette);
 
     void setMoveLimits(DGL::Point<int> origin, DGL::Size<uint> size);
     void repositionWithinLimits();
@@ -21,6 +22,7 @@ private:
     DGL::Point<int> restrictWithinLimits(DGL::Point<int> pos);
 
 private:
+    ColorPalette &fPalette;
     std::vector<Widget *> fMoveAlong;
     bool fIsDragging = false;
     DGL::Point<int> fDragMouseOrigin;

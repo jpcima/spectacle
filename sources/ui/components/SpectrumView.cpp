@@ -1,5 +1,6 @@
 #include "SpectrumView.h"
 #include "ui/FontEngine.h"
+#include "plugin/ColorPalette.h"
 #include "Color.hpp"
 #include "Window.hpp"
 #include "Cairo.hpp"
@@ -18,9 +19,10 @@ static double ftom(double f)
 }
 
 ///
-SpectrumView::SpectrumView(Widget *parent, FontEngine &fontEngine)
+SpectrumView::SpectrumView(Widget *parent, FontEngine &fontEngine, ColorPalette &palette)
     : Widget(parent),
-      fFontEngine(fontEngine)
+      fFontEngine(fontEngine),
+      fColorPalette(palette)
 {
 }
 
@@ -200,12 +202,11 @@ void SpectrumView::onDisplay()
     points.reserve(width);
 
     ///
+    const ColorPalette &cp = fColorPalette;
+
+    ///
     for (uint32_t channel = 0; channel < numChannels; ++channel) {
         const Spline &spline = mem.getSpline(channel);
-
-        ///
-        auto wrap = [](double x) { return x - (long)x; };
-        const Color color = Color::fromHSL(wrap(0.5 + channel / 3.0), 0.8, 0.3);
 
         ///
         points.clear();
@@ -221,13 +222,13 @@ void SpectrumView::onDisplay()
         for (uint32_t i = 1, n = points.size(); i < n; ++i)
             cairo_line_to(cr, points[i].x, points[i].y);
         cairo_set_line_width(cr, 1.0);
-        cairo_set_source_rgb(cr, color.red, color.green, color.blue);
+        cairo_set_source_rgba8(cr, cp[Colors::spectrum_line_channel1 + channel]);
         cairo_stroke_preserve(cr);
 
         // plot fill
         cairo_line_to(cr, points.back().x, height);
         cairo_line_to(cr, points.front().x, height);
-        cairo_set_source_rgba(cr, color.red, color.green, color.blue, 0.1f);
+        cairo_set_source_rgba8(cr, cp[Colors::spectrum_fill_channel1 + channel]);
         cairo_fill(cr);
     }
 
@@ -236,7 +237,7 @@ void SpectrumView::onDisplay()
         const double x = xOfKey(fKeyRef);
         const double y = yOfDbMag(fdBref);
         cairo_set_line_width(cr, 1.0);
-        cairo_set_source_rgba8(cr, {0xff, 0xaa, 0x00, 0x40});
+        cairo_set_source_rgba8(cr, cp[Colors::spectrum_select_line]);
         cairo_new_path(cr);
         cairo_move_to(cr, 0, (int)y + 0.5);
         cairo_line_to(cr, width, (int)y + 0.5);
@@ -254,25 +255,26 @@ void SpectrumView::displayBack()
 {
     cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
     FontEngine &fe = fFontEngine;
+    const ColorPalette &cp = fColorPalette;
 
     ///
     const uint32_t width = getWidth();
     const uint32_t height = getHeight();
 
     ///
-    cairo_set_source_rgb(cr, 0.1, 0.1, 0.2);
+    cairo_set_source_rgba8(cr, cp[Colors::spectrum_background]);
     cairo_rectangle(cr, 0, 0, width, height);
     cairo_fill(cr);
 
     ///
     Font font;
     font.name = "regular";
-    font.color = {0x4c, 0x4c, 0x4c, 0xff};
+    font.color = cp[Colors::spectrum_grid_text];
     font.size = 14;
 
     ///
     cairo_set_line_width(cr, 1.0);
-    cairo_set_source_rgba(cr, 0.3, 0.3, 0.3, 0.5);
+    cairo_set_source_rgba8(cr, cp[Colors::spectrum_grid_lines]);
     int32_t midiKey = (int32_t)std::ceil(fKeyMin);
     while ((midiKey + 3) % 12 != 0) ++midiKey;
     for (const double keyMax = fKeyMax; midiKey <= keyMax; midiKey += 12)

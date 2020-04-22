@@ -28,9 +28,11 @@
 #include "DistrhoUI.hpp"
 #include "PluginSpectralAnalyzer.hpp"
 #include "ui/components/MainToolBar.h"
+#include "SimpleIni.h"
 #include <string>
 #include <vector>
 #include <memory>
+#include <sys/time.h> // timespec
 class FontEngine;
 class SpectrumView;
 class FloatingWindow;
@@ -39,6 +41,7 @@ class Slider;
 class TextLabel;
 class SelectionRectangle;
 class KnobSkin;
+class ColorPalette;
 
 class UISpectralAnalyzer : public UI, MainToolBar::Listener {
 public:
@@ -78,6 +81,9 @@ private:
         return w;
     }
 
+    void loadTheme(const char *theme);
+    void reloadThemeList();
+
 private:
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
@@ -106,6 +112,10 @@ private:
     double fSelectLastCursorFreq = 0.0;
     double fSelectLastCursorMag = 0.0;
 
+    FloatingWindow *fColorWindow = nullptr;
+    SpinBoxChooser *fThemeChooser = nullptr;
+    SpinBoxChooser *fThemeEditChooser = nullptr;
+
     std::unique_ptr<KnobSkin> fSkinKnob;
 
     std::vector<std::unique_ptr<Widget>> fSubWidgets;
@@ -120,6 +130,7 @@ private:
         kModeScale,
         kModeSelect,
         kModeHide,
+        kModeColor,
     };
 
     int fMode = kModeNormal;
@@ -127,6 +138,13 @@ private:
     bool fScaleRectDragging = false;
 
     bool fInitializedFloatingWindowPos = false;
+
+    std::unique_ptr<ColorPalette> fPalette;
+
+    std::unique_ptr<CSimpleIniA> fUiConfig;
+    std::string fCurrentTheme = "default";
+    timespec fCurrentThemeMtime {};
+    bool fThemeEditMode = false;
 
 private:
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UISpectralAnalyzer)
