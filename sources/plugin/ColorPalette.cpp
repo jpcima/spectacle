@@ -180,4 +180,6 @@ void ColorPalette::save_defaults(CSimpleIniA &ini, const char *section, bool ove
 
     fill_color(Colors::floating_window_back, "#00000040", nullptr);
     fill_color(Colors::tool_bar_back, "floating-window-back", nullptr);
+
+    fill_color(Colors::selection_rectangle, "#ffffff", nullptr);
 }

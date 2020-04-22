@@ -439,7 +439,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fColorWindow->moveAlong(fThemeEditChooser);
     }
 
-    fSelectionRectangle = makeSubwidget<SelectionRectangle>(this);
+    fSelectionRectangle = makeSubwidget<SelectionRectangle>(this, palette);
     fSelectionRectangle->setVisible(false);
 
     uiReshape(getWidth(), getHeight());
