@@ -33,14 +33,12 @@
 #include <vector>
 #include <memory>
 #include <sys/time.h> // timespec
-class FontEngine;
 class SpectrumView;
 class FloatingWindow;
 class SpinBoxChooser;
 class Slider;
 class TextLabel;
 class SelectionRectangle;
-class KnobSkin;
 class ColorPalette;
 
 class UISpectralAnalyzer : public UI, MainToolBar::Listener {
@@ -58,7 +56,7 @@ protected:
     void uiIdle() override;
     void uiReshape(uint width, uint height) override;
 
-    void onDisplay() override;
+    void onNanoDisplay() override;
     bool onMouse(const MouseEvent &ev) override;
     bool onMotion(const MotionEvent &ev) override;
 
@@ -87,7 +85,6 @@ private:
 private:
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
-    std::unique_ptr<FontEngine> fFontEngine;
     SpectrumView *fSpectrumView = nullptr;
 
     MainToolBar *fMainToolBar = nullptr;
@@ -100,6 +97,7 @@ private:
 
     FloatingWindow *fScaleWindow = nullptr;
     SelectionRectangle *fSelectionRectangle = nullptr;
+    ::Point fSelectionOrigin;
 
     FloatingWindow *fSelectWindow = nullptr;
     TextLabel *fSelectLabelX = nullptr;
@@ -115,8 +113,6 @@ private:
     FloatingWindow *fColorWindow = nullptr;
     SpinBoxChooser *fThemeChooser = nullptr;
     SpinBoxChooser *fThemeEditChooser = nullptr;
-
-    std::unique_ptr<KnobSkin> fSkinKnob;
 
     std::vector<std::unique_ptr<Widget>> fSubWidgets;
 

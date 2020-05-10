@@ -30,28 +30,16 @@
 #include "Config.h"
 #include "ui/components/SpectrumView.h"
 #include "ui/components/FloatingWindow.h"
-#include "ui/components/SkinSlider.hpp"
 #include "ui/components/SpinBoxChooser.h"
 #include "ui/components/Slider.h"
 #include "ui/components/TextLabel.h"
 #include "ui/components/SelectionRectangle.h"
 #include "ui/FontEngine.h"
-#include "ui/KnobSkin.hpp"
 #include "dsp/AnalyzerDefs.h"
 #include "util/format_string.h"
 #include "Window.hpp"
 #include "Color.hpp"
 #include <sys/stat.h>
-
-static constexpr uint8_t fontRegular[] = {
-    #include "fonts/liberation/LiberationSans-Regular.ttf.h"
-};
-static constexpr uint8_t fontAwesome[] = {
-    #include "fonts/fontawesome/Font-Awesome-5-Free-Solid-900.otf.h"
-};
-static constexpr uint8_t knobPng[] = {
-    #include "skin/knob.png.h"
-};
 
 enum {
     kToolBarIdSetup = 1,
@@ -100,14 +88,11 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     loadTheme(uiConfig.GetValue("ui", "theme", "default"));
 
-    FontEngine *fe = new FontEngine(palette);
-    fFontEngine.reset(fe);
-    fe->addFont("regular", fontRegular, sizeof(fontRegular));
-    fe->addFont("awesome", fontAwesome, sizeof(fontAwesome));
+    FontEngine fe(*this, palette);
 
-    fSpectrumView = makeSubwidget<SpectrumView>(this, *fe, palette);
+    fSpectrumView = makeSubwidget<SpectrumView>(this, palette);
 
-    fMainToolBar = makeSubwidget<MainToolBar>(this, *fe, palette);
+    fMainToolBar = makeSubwidget<MainToolBar>(this, palette);
     fMainToolBar->addButton(kToolBarIdSetup, "Setup", "\uf085");
     fMainToolBar->addButton(kToolBarIdScale, "Scale", "\uf0b2");
     fMainToolBar->addButton(kToolBarIdFreeze, "Freeze", "\uf256");
@@ -115,8 +100,6 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fMainToolBar->addButton(kToolBarIdHide, "Hide", "\uf0d0");
     fMainToolBar->addButton(kToolBarIdColor, "Color", "\uf53f");
     fMainToolBar->setListener(this);
-
-    fSkinKnob.reset(new KnobSkin(knobPng, sizeof(knobPng), 31));
 
     Font fontAwesome;
     fontAwesome.name = "awesome";
@@ -143,7 +126,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         TextLabel *label;
 
-        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSetupWindow, palette);
         label->setText("Resolution");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -151,7 +134,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(100, 20);
         fSetupWindow->moveAlong(label);
 
-        fFftSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, *fe, palette);
+        fFftSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, palette);
         fFftSizeChooser->setSize(150, 20);
         fFftSizeChooser->setAbsolutePos(100, y);
         for (uint32_t sizeLog2 = kStftMinSizeLog2; sizeLog2 <= kStftMaxSizeLog2; ++sizeLog2)
@@ -162,7 +145,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSetupWindow, palette);
         label->setText("Step");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -170,7 +153,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(100, 20);
         fSetupWindow->moveAlong(label);
 
-        fStepSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, *fe, palette);
+        fStepSizeChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, palette);
         fStepSizeChooser->setSize(150, 20);
         fStepSizeChooser->setAbsolutePos(100, y);
         for (uint32_t stepLog2 = kStftMinStepLog2; stepLog2 <= kStftMaxStepLog2; ++stepLog2)
@@ -181,7 +164,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSetupWindow, palette);
         label->setText("Attack time");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -189,7 +172,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(100, 20);
         fSetupWindow->moveAlong(label);
 
-        fAttackTimeSlider = makeSubwidget<Slider>(fSetupWindow, *fe, palette);
+        fAttackTimeSlider = makeSubwidget<Slider>(fSetupWindow, palette);
         fAttackTimeSlider->setSize(150, 20);
         fAttackTimeSlider->setAbsolutePos(100, y);
         fAttackTimeSlider->setValueBounds(kStftMinAttackTime, kStftMaxAttackTime);
@@ -201,7 +184,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fSetupWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSetupWindow, palette);
         label->setText("Release time");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -209,7 +192,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(100, 20);
         fSetupWindow->moveAlong(label);
 
-        fReleaseTimeSlider = makeSubwidget<Slider>(fSetupWindow, *fe, palette);
+        fReleaseTimeSlider = makeSubwidget<Slider>(fSetupWindow, palette);
         fReleaseTimeSlider->setSize(150, 20);
         fReleaseTimeSlider->setAbsolutePos(100, y);
         fReleaseTimeSlider->setValueBounds(kStftMinReleaseTime, kStftMaxReleaseTime);
@@ -222,44 +205,44 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fScaleWindow = makeSubwidget<FloatingWindow>(this, palette);
     fScaleWindow->setVisible(false);
-    fScaleWindow->setSize(150, 70);
+    fScaleWindow->setSize(180, 70);
     {
         int y = 10;
 
         TextLabel *label;
 
-        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label = makeSubwidget<TextLabel>(fScaleWindow, palette);
         label->setText("\uf8cc");
         label->setFont(fontAwesome);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
         label->setAbsolutePos(10, y);
-        label->setSize(100, 20);
+        label->setSize(130, 20);
         fScaleWindow->moveAlong(label);
 
-        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label = makeSubwidget<TextLabel>(fScaleWindow, palette);
         label->setText("left: select zoom region");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
         label->setAbsolutePos(30, y);
-        label->setSize(100, 20);
+        label->setSize(130, 20);
         fScaleWindow->moveAlong(label);
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label = makeSubwidget<TextLabel>(fScaleWindow, palette);
         label->setText("\uf8cc");
         label->setFont(fontAwesome);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
         label->setAbsolutePos(10, y);
-        label->setSize(100, 20);
+        label->setSize(130, 20);
         fScaleWindow->moveAlong(label);
 
-        label = makeSubwidget<TextLabel>(fScaleWindow, *fe);
+        label = makeSubwidget<TextLabel>(fScaleWindow, palette);
         label->setText("right: reset zoom");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
         label->setAbsolutePos(30, y);
-        label->setSize(100, 20);
+        label->setSize(130, 20);
         fScaleWindow->moveAlong(label);
     }
 
@@ -272,7 +255,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         TextLabel *label;
 
-        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSelectWindow, palette);
         label->setText("Cursor");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -282,7 +265,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSelectWindow, palette);
         label->setText("\uf337");
         label->setFont(fontAwesome);
         label->setAlignment(kAlignCenter|kAlignInside);
@@ -290,7 +273,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(20, 20);
         fSelectWindow->moveAlong(label);
 
-        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSelectWindow, palette);
         fSelectLabelX = label;
         //label->setText("");
         label->setFont(fontLabel);
@@ -301,7 +284,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSelectWindow, palette);
         label->setText("\uf338");
         label->setFont(fontAwesome);
         label->setAlignment(kAlignCenter|kAlignInside);
@@ -309,7 +292,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(20, 20);
         fSelectWindow->moveAlong(label);
 
-        label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+        label = makeSubwidget<TextLabel>(fSelectWindow, palette);
         fSelectLabelY = label;
         //label->setText("");
         label->setFont(fontLabel);
@@ -324,7 +307,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         for (unsigned c = 0; c < kNumChannels; ++c) {
             y += 30;
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeSubwidget<TextLabel>(fSelectWindow, palette);
             label->setText("\uf140");
             label->setFont(fontChNAwesome[c]);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -332,7 +315,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
             label->setSize(100, 20);
             fSelectWindow->moveAlong(label);
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeSubwidget<TextLabel>(fSelectWindow, palette);
             fSelectChannelY[c] = label;
             //label->setText("");
             label->setFont(fontChNLabel[c]);
@@ -349,7 +332,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
             y = 10;
 
             if (c == 0) {
-                label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+                label = makeSubwidget<TextLabel>(fSelectWindow, palette);
                 label->setText("Nearby peak");
                 label->setFont(fontLabel);
                 label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -360,7 +343,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
             y += 30;
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeSubwidget<TextLabel>(fSelectWindow, palette);
             label->setText("\uf140");
             label->setFont(fontChNAwesome[c]);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -368,7 +351,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
             label->setSize(100, 20);
             fSelectWindow->moveAlong(label);
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeSubwidget<TextLabel>(fSelectWindow, palette);
             fSelectNearPeakX[c] = label;
             //label->setText("");
             label->setFont(fontChNLabel[c]);
@@ -379,7 +362,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
             y += 30;
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeSubwidget<TextLabel>(fSelectWindow, palette);
             label->setText("\uf140");
             label->setFont(fontChNAwesome[c]);
             label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -387,7 +370,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
             label->setSize(100, 20);
             fSelectWindow->moveAlong(label);
 
-            label = makeSubwidget<TextLabel>(fSelectWindow, *fe);
+            label = makeSubwidget<TextLabel>(fSelectWindow, palette);
             fSelectNearPeakY[c] = label;
             //label->setText("");
             label->setFont(fontChNLabel[c]);
@@ -408,7 +391,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
         TextLabel *label;
 
-        label = makeSubwidget<TextLabel>(fColorWindow, *fe);
+        label = makeSubwidget<TextLabel>(fColorWindow, palette);
         label->setText("Theme");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -416,14 +399,14 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(100, 20);
         fColorWindow->moveAlong(label);
 
-        fThemeChooser = makeSubwidget<SpinBoxChooser>(fColorWindow, *fe, palette);
+        fThemeChooser = makeSubwidget<SpinBoxChooser>(fColorWindow, palette);
         fThemeChooser->setSize(150, 20);
         fThemeChooser->setAbsolutePos(100, y);
         fColorWindow->moveAlong(fThemeChooser);
 
         y += 30;
 
-        label = makeSubwidget<TextLabel>(fColorWindow, *fe);
+        label = makeSubwidget<TextLabel>(fColorWindow, palette);
         label->setText("Edit mode");
         label->setFont(fontLabel);
         label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
@@ -431,7 +414,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         label->setSize(100, 20);
         fColorWindow->moveAlong(label);
 
-        fThemeEditChooser = makeSubwidget<SpinBoxChooser>(fColorWindow, *fe, palette);
+        fThemeEditChooser = makeSubwidget<SpinBoxChooser>(fColorWindow, palette);
         fThemeEditChooser->setSize(150, 20);
         fThemeEditChooser->setAbsolutePos(100, y);
         fThemeEditChooser->addChoice(0, "off");
@@ -554,7 +537,7 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
 
 // -----------------------------------------------------------------------
 
-void UISpectralAnalyzer::onDisplay()
+void UISpectralAnalyzer::onNanoDisplay()
 {
 }
 
@@ -564,6 +547,7 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
         fSelectionRectangle->setVisible(true);
         fSelectionRectangle->setAbsolutePos(ev.pos);
         fSelectionRectangle->setSize(0, 0);
+        fSelectionOrigin = ::Point(ev.pos.getX(), ev.pos.getY());
         fScaleRectDragging = true;
         return true;
     }
@@ -611,9 +595,16 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
     switch (fMode) {
     case kModeScale:
         if (fScaleRectDragging) {
-            fSelectionRectangle->setSize(
-                ev.pos.getX() - fSelectionRectangle->getAbsoluteX(),
-                ev.pos.getY() - fSelectionRectangle->getAbsoluteY());
+            int x1 = ev.pos.getX();
+            int y1 = ev.pos.getY();
+            int x2 = fSelectionOrigin.x;
+            int y2 = fSelectionOrigin.y;
+            if (x1 > x2)
+                std::swap(x1, x2);
+            if (y1 > y2)
+                std::swap(y1, y2);
+            fSelectionRectangle->setAbsolutePos(x1, y1);
+            fSelectionRectangle->setSize(x2 - x1, y2 - y1);
         }
         break;
     case kModeSelect:

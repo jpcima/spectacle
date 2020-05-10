@@ -69,18 +69,15 @@ FILES_UI = \
 	sources/plugin/Parameters.cpp \
 	sources/plugin/Config.cpp \
 	sources/plugin/ColorPalette.cpp \
+	sources/plugin/FontDefs.cpp \
 	sources/ui/components/SpectrumView.cpp \
 	sources/ui/components/MainToolBar.cpp \
 	sources/ui/components/FloatingWindow.cpp \
-	sources/ui/components/SkinSlider.cpp \
 	sources/ui/components/SpinBoxChooser.cpp \
 	sources/ui/components/Slider.cpp \
 	sources/ui/components/TextLabel.cpp \
 	sources/ui/components/SelectionRectangle.cpp \
-	sources/ui/KnobSkin.cpp \
 	sources/ui/FontEngine.cpp \
-	sources/ui/Fontstash.cpp \
-	sources/ui/Cairo++.cpp \
 	sources/util/format_string.cpp \
 	thirdparty/spline/spline/spline.cpp \
 	thirdparty/simpleini/ConvertUTF.cpp
@@ -88,11 +85,12 @@ FILES_UI = \
 # --------------------------------------------------------------
 # Do some magic
 
-UI_TYPE = cairo
+#UI_TYPE = cairo
+UI_TYPE = opengl
 include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
-BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/fontstash -Ithirdparty/stb -Ithirdparty/simpleini
+BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini
 LINK_FLAGS += -lfftw3f
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
@@ -104,8 +102,7 @@ endif
 
 FILES_RES = \
 	fonts/liberation/LiberationSans-Regular.ttf.h \
-	fonts/fontawesome/Font-Awesome-5-Free-Solid-900.otf.h \
-	skin/knob.png.h
+	fonts/fontawesome/Font-Awesome-5-Free-Solid-900.otf.h
 
 res: $(foreach r,$(FILES_RES),$(BUILD_DIR)/res/$(r))
 

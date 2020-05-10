@@ -1,9 +1,9 @@
 #pragma once
-#include "Widget.hpp"
+#include "NanoVG.hpp"
 #include <vector>
 class ColorPalette;
 
-class FloatingWindow : public Widget {
+class FloatingWindow : public NanoWidget {
 public:
     FloatingWindow(Widget *group, ColorPalette &palette);
 
@@ -13,7 +13,7 @@ public:
     void setAllVisible(bool visible);
 
 protected:
-    void onDisplay() override;
+    void onNanoDisplay() override;
     void onPositionChanged(const PositionChangedEvent &ev) override;
     bool onMouse(const MouseEvent &ev) override;
     bool onMotion(const MotionEvent &ev) override;

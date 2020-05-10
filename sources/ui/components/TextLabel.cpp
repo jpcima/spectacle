@@ -1,10 +1,10 @@
 #include "TextLabel.h"
 #include "Window.hpp"
-#include "Cairo.hpp"
+#include "plugin/ColorPalette.h"
 
-TextLabel::TextLabel(Widget *group, FontEngine &fontEngine)
-    : Widget(group),
-      fFontEngine(fontEngine)
+TextLabel::TextLabel(Widget *group, const ColorPalette &palette)
+    : NanoWidget(group),
+      fPalette(palette)
 {
 }
 
@@ -35,11 +35,11 @@ void TextLabel::setAlignment(int align)
     repaint();
 }
 
-void TextLabel::onDisplay()
+void TextLabel::onNanoDisplay()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
-    FontEngine &fe = fFontEngine;
+    const ColorPalette &cp = fPalette;
+    FontEngine fe(*this, cp);
 
     Rect box{0, 0, (int)getWidth(), (int)getHeight()};
-    fe.drawInBox(cr, fText.c_str(), fFont, box, fAlign);
+    fe.drawInBox(fText.c_str(), fFont, box, fAlign);
 }

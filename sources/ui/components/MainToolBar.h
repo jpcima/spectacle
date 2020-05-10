@@ -1,15 +1,14 @@
 #pragma once
-#include "Widget.hpp"
+#include "NanoVG.hpp"
 #include "ui/Geometry.h"
 #include <string>
 #include <vector>
 #include <memory>
-class FontEngine;
 class ColorPalette;
 
-class MainToolBar : public Widget {
+class MainToolBar : public NanoWidget {
 public:
-    MainToolBar(Widget *group, FontEngine &fontEngine, ColorPalette &palette);
+    MainToolBar(Widget *group, ColorPalette &palette);
     void addButton(int id, const char *label, const char *icon);
     void setSelected(int id, bool sel);
     float getIdealWidth() const;
@@ -23,7 +22,7 @@ public:
     void setListener(Listener *l) { fListener = l; }
 
 protected:
-    void onDisplay() override;
+    void onNanoDisplay() override;
     void onResize(const ResizeEvent &ev) override;
     bool onMouse(const MouseEvent &ev) override;
 
@@ -44,7 +43,6 @@ private:
     };
 
 private:
-    FontEngine &fFontEngine;
     ColorPalette &fPalette;
     std::vector<Item> fLayout;
     std::vector<RectF> fItemRects;

@@ -1,8 +1,8 @@
 #pragma once
-#include "Fontstash.h"
 #include "Color.h"
 #include "Geometry.h"
-#include "Cairo++.h"
+#include "NanoVG.hpp"
+#include <vector>
 #include <cstdint>
 class ColorPalette;
 
@@ -25,28 +25,18 @@ enum FontAlign {
 ///
 class FontEngine {
 public:
-    explicit FontEngine(ColorPalette &palette);
-    FontEngine(ColorPalette &palette, unsigned width, unsigned height);
-    ~FontEngine();
+    explicit FontEngine(NanoVG &vg, const ColorPalette &palette);
 
-    bool addFont(const char *name, const uint8_t *data, unsigned size);
-
-    void draw(cairo_t *cr, const char *text, const Font &font, double x, double y);
-    void drawInBox(cairo_t *cr, const char *text, const Font &font, const Rect &box, int align);
-    void drawInBox(cairo_t *cr, const char *text, const Font &font, const RectF &box, int align);
+    void draw(const char *text, const Font &font, double x, double y);
+    void drawInBox(const char *text, const Font &font, const Rect &box, int align);
+    void drawInBox(const char *text, const Font &font, const RectF &box, int align);
 
 private:
-    static int renderCreate(void *uptr, int width, int height);
-    static int renderResize(void *uptr, int width, int height);
-    static void renderUpdate(void *uptr, int *rect, const unsigned char *data);
-    static void renderDraw(void *uptr, const FONSquad *quads, const unsigned int *colors, int nquads);
-    static void renderDelete(void *uptr);
+    int lazyFont(const char *name);
 
 private:
-    ColorPalette &fColorPalette;
-    FONScontext_u fContext;
-    cairo_surface_u fAtlas;
-    cairo_t *fDrawingContext = nullptr;
+    NanoVG &fVg;
+    const ColorPalette &fColorPalette;
 };
 
 ///
@@ -55,14 +45,15 @@ struct Font {
     float size = 12.0;
     int colorRef = -1;
     ColorRGBA8 color = {0x00, 0x00, 0x00, 0xff};
-    float spacing = 0.0;
-    float blur = 0;
 };
 
 inline bool operator==(const Font &a, const Font &b)
 {
-    return a.name == b.name && a.size == b.size && a.color == b.color &&
-        a.spacing == b.spacing && a.blur == b.blur;
+    return
+        a.name == b.name &&
+        a.size == b.size &&
+        a.colorRef == b.colorRef &&
+        a.color == b.color;
 }
 
 inline bool operator!=(const Font &a, const Font &b)
