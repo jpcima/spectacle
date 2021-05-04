@@ -54,7 +54,7 @@ enum {
 // Init / Deinit
 
 UISpectralAnalyzer::UISpectralAnalyzer()
-    : UI(700, 350),
+    : UI(1000, 350),
       fPalette(new ColorPalette(ColorPalette::create_default()))
 {
     ColorPalette &palette = *fPalette;
