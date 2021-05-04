@@ -68,7 +68,7 @@ private:
     Memory fFreezeMemory {};
 
     // scale defaults
-    static constexpr float kdBminDefault = -100.0;
+    static constexpr float kdBminDefault = -96.0;
     static constexpr float kdBmaxDefault = +0.0;
     static constexpr float kKeyMinDefault = 12.0;
     static constexpr float kKeyMaxDefault = 127.0;

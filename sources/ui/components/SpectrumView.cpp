@@ -321,8 +321,8 @@ void SpectrumView::displayBack()
     ///
     const double dBmin = fdBmin;
     const double dBmax = fdBmax;
-    constexpr double dBinterval = 20.0;
-    constexpr uint32_t dBsubdivs = 10;
+    constexpr double dBinterval = 12.0;
+    constexpr uint32_t dBsubdivs = 4;
 
     const double dBminAligned = std::round(dBmin / dBinterval) * dBinterval;
 
