@@ -137,50 +137,33 @@ void ColorPalette::save_defaults(CSimpleIniA &ini, const char *section, bool ove
         ini.SetValue(section, Colors::Name[color], value, comment, overwrite);
     };
 
-    fill_color(Colors::text_normal, "#ffffff", nullptr);
-    fill_color(Colors::text_active, "#ffaa00", nullptr);
+    fill_color(Colors::text_normal, "#e0e0e0", nullptr);
+    fill_color(Colors::text_active, "#ffb219", nullptr);
 
-    auto hueFromChannel = [](uint32_t channel) {
-        double h = 0.5 + channel / 3.0;
-        h -= (long)h;
-        return h;
-    };
+    fill_color(Colors::text_channel1, "#73e673", nullptr);
+    fill_color(Colors::text_channel1 + 1, "#e6b173", nullptr);
 
-    for (uint32_t channel = 0; channel < DISTRHO_PLUGIN_NUM_INPUTS; ++channel) {
-        const ColorRGBA8 colorText = Colors::toRGBA8(
-            DGL::Color::fromHSL(hueFromChannel(channel), 0.8, 0.5));
-        fill_color(Colors::text_channel1 + channel, hex_from_color(colorText).c_str(), nullptr);
-    }
-
-    fill_color(Colors::spectrum_background, "#202033", nullptr);
+    fill_color(Colors::spectrum_background, "#000000", nullptr);
 
     fill_color(Colors::spectrum_grid_text, "#ffffff80", nullptr);
     fill_color(Colors::spectrum_grid_lines, "#6b6b6b80", nullptr);
     fill_color(Colors::spectrum_minor_grid_lines, "#2c2c2c80", nullptr);
 
-    for (uint32_t channel = 0; channel < DISTRHO_PLUGIN_NUM_INPUTS; ++channel) {
-        const ColorRGBA8 colorStroke = Colors::toRGBA8(
-            DGL::Color::fromHSL(hueFromChannel(channel), 0.8, 0.3));
-        const ColorRGBA8 colorFill =
-            { colorStroke.r, colorStroke.g, colorStroke.b, 0x10 };
-        fill_color(
-            Colors::spectrum_line_channel1 + channel,
-            hex_from_color(colorStroke).c_str(), nullptr);
-        fill_color(
-            Colors::spectrum_fill_channel1 + channel,
-            hex_from_color(colorFill).c_str(), nullptr);
-    }
+    fill_color(Colors::spectrum_line_channel1, "#00ff00", nullptr);
+    fill_color(Colors::spectrum_fill_channel1, "#00ff0000", nullptr);
+    fill_color(Colors::spectrum_line_channel1 + 1, "#e88710", nullptr);
+    fill_color(Colors::spectrum_fill_channel1 + 1, "#e8871000", nullptr);
 
     fill_color(Colors::spectrum_select_line, "#ffaa0040", nullptr);
 
-    fill_color(Colors::slider_back, "#262626", nullptr);
-    fill_color(Colors::slider_fill, "#404040", nullptr);
+    fill_color(Colors::slider_back, "#26262680", nullptr);
+    fill_color(Colors::slider_fill, "#69696980", nullptr);
 
     fill_color(Colors::spin_box_back, "slider-back", nullptr);
     fill_color(Colors::spin_box_fill, "slider-fill", nullptr);
 
-    fill_color(Colors::floating_window_back, "#00000040", nullptr);
+    fill_color(Colors::floating_window_back, "#4973a6c0", nullptr);
     fill_color(Colors::tool_bar_back, "floating-window-back", nullptr);
 
-    fill_color(Colors::selection_rectangle, "#ffffff", nullptr);
+    fill_color(Colors::selection_rectangle, "text-normal", nullptr);
 }
