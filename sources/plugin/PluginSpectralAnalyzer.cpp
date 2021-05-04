@@ -143,29 +143,58 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
         const uint32_t stepSize = 1u << (uint32_t)fParameters[kPidStepSize];
         const float attackTime = fParameters[kPidAttackTime];
         const float releaseTime = fParameters[kPidReleaseTime];
+        for (CQT &cqt : fCqt)
+            cqt.configure(fftSize, stepSize, attackTime, releaseTime, sampleRate);
         for (STFT &stft : fStft)
             stft.configure(fftSize, stepSize, attackTime, releaseTime, sampleRate);
     }
 
     for (uint32_t c = 0; c < kNumChannels; ++c) {
         STFT &stft = fStft[c];
+        CQT &cqt = fCqt[c];
         const float *input = inputs[c];
+
+        // TODO 
+        cqt.process(input, frames);
+
         stft.process(input, frames);
     }
 
     std::unique_lock<std::mutex> sendLock(fSendMutex, std::try_to_lock);
     if (sendLock.owns_lock()) {
-        const uint32_t fftSize = fStft[0].getFftSize();
-        const uint32_t specSize = fftSize / 2 + 1;
-        fSendSize = specSize;
+        uint32_t numBins = 0;
+        const float *frequencies[kNumChannels] = {};
+        const float *magnitudes[kNumChannels] = {};
+
+        ///
+        if (1) {
+            // TODO constant-Q 
+            numBins = fCqt[0].getNumBins();
+            for (uint32_t c = 0; c < kNumChannels; ++c) {
+                CQT &cqt = fCqt[c];
+                frequencies[c] = cqt.getFrequencies();
+                magnitudes[c] = cqt.getMagnitudes();
+            }
+        }
+        else {
+            const uint32_t fftSize = fStft[0].getFftSize();
+            numBins = fftSize / 2 + 1;
+            for (uint32_t c = 0; c < kNumChannels; ++c) {
+                STFT &stft = fStft[c];
+                frequencies[c] = stft.getFrequencies();
+                magnitudes[c] = stft.getMagnitudes();
+            }
+        }
+
+        ///
+        fSendSize = numBins;
         for (uint32_t c = 0; c < kNumChannels; ++c) {
-            STFT &stft = fStft[c];
             std::memcpy(
-                &fSendFrequencies[c * specSize], stft.getFrequencies(),
-                specSize * sizeof(float));
+                &fSendFrequencies[c * numBins], frequencies[c],
+                numBins * sizeof(float));
             std::memcpy(
-                &fSendMagnitudes[c * specSize], stft.getMagnitudes(),
-                specSize * sizeof(float));
+                &fSendMagnitudes[c * numBins], magnitudes[c],
+                numBins * sizeof(float));
         }
     }
 

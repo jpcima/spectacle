@@ -117,7 +117,7 @@ void STFT::processNewWindow(const float *rawInput)
     float *mag = _outputMagnitudes.data();
     ARFollower *ar = _arSmooth.data();
     for (uint32_t i = 0; i < fftSize / 2 + 1; ++i) {
-        double curMag = std::abs(cpx[i]) * (2.0f / fftSize);
+        double curMag = std::abs(cpx[i]) * (2.0 / fftSize);
         if (kOutputNoDcComponent && i == 0)
             curMag = kStftFloorMagnitude;
         if (kOutputAsDecibels)

@@ -27,6 +27,8 @@
 #pragma once
 #include "DistrhoPlugin.hpp"
 #include "dsp/STFT.h"
+#include "dsp/CQT.h"
+#include <vector>
 #include <mutex>
 #include <memory>
 #include <atomic>
@@ -120,6 +122,7 @@ private:
 
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
+    CQT fCqt[kNumChannels];
     STFT fStft[kNumChannels];
     std::atomic<int> fMustReconfigureStft {0};
 

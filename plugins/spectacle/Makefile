@@ -59,10 +59,13 @@ BUILD_LADSPA ?= false
 # --------------------------------------------------------------
 # Files to build
 
+SPECTACLE_USE_CQT = true
+
 FILES_DSP = \
 	sources/plugin/PluginSpectralAnalyzer.cpp \
 	sources/plugin/Parameters.cpp \
-	sources/dsp/STFT.cpp
+	sources/dsp/STFT.cpp \
+	sources/dsp/CQT.cpp
 
 FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \
@@ -82,6 +85,12 @@ FILES_UI = \
 	thirdparty/spline/spline/spline.cpp \
 	thirdparty/simpleini/ConvertUTF.cpp
 
+FILES_DSP += \
+	thirdparty/essentia/src/constantq.cpp \
+	thirdparty/essentia/src/fftw.cpp \
+	thirdparty/essentia/src/fftwcomplex.cpp \
+	thirdparty/essentia/src/windowing.cpp
+
 # --------------------------------------------------------------
 # Do some magic
 
@@ -90,12 +99,12 @@ UI_TYPE = opengl
 include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
-BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini
-LINK_FLAGS += -lfftw3f
+BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/essentia/src
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
 BUILD_CXX_FLAGS += -DUSE_IMPATIENT_FFT_PLANNING=1
 endif
+LINK_FLAGS += -lfftw3f
 
 # --------------------------------------------------------------
 # Resources
