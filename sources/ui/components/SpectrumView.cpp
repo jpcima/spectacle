@@ -205,6 +205,9 @@ void SpectrumView::onNanoDisplay()
     for (uint32_t channel = 0; channel < numChannels; ++channel) {
         const Spline &spline = mem.getSpline(channel);
 
+        const ColorRGBA8 linecolor = cp[Colors::spectrum_line_channel1 + channel];
+        const ColorRGBA8 fillcolor = cp[Colors::spectrum_fill_channel1 + channel];
+
         ///
         points.clear();
         for (uint32_t x = 0, step = 1; x <= width; x += step) {
@@ -214,23 +217,27 @@ void SpectrumView::onNanoDisplay()
         }
 
         // plot line
-        beginPath();
-        moveTo(points[0].x, points[0].y);
-        for (uint32_t i = 1, n = points.size(); i < n; ++i)
-            lineTo(points[i].x, points[i].y);
-        strokeWidth(1.0);
-        strokeColor(Colors::fromRGBA8(cp[Colors::spectrum_line_channel1 + channel]));
-        stroke();
+        if (linecolor.a > 0) {
+            beginPath();
+            moveTo(points[0].x, points[0].y);
+            for (uint32_t i = 1, n = points.size(); i < n; ++i)
+                lineTo(points[i].x, points[i].y);
+            strokeWidth(1.0);
+            strokeColor(Colors::fromRGBA8(linecolor));
+            stroke();
+        }
 
         // plot fill
-        beginPath();
-        moveTo(points[0].x, points[0].y);
-        for (uint32_t i = 1, n = points.size(); i < n; ++i)
-            lineTo(points[i].x, points[i].y);
-        lineTo(points.back().x, height);
-        lineTo(points.front().x, height);
-        fillColor(Colors::fromRGBA8(cp[Colors::spectrum_fill_channel1 + channel]));
-        fill();
+        if (fillcolor.a > 0) {
+            beginPath();
+            moveTo(points[0].x, points[0].y);
+            for (uint32_t i = 1, n = points.size(); i < n; ++i)
+                lineTo(points[i].x, points[i].y);
+            lineTo(points.back().x, height);
+            lineTo(points.front().x, height);
+            fillColor(Colors::fromRGBA8(fillcolor));
+            fill();
+        }
     }
 
     ///
