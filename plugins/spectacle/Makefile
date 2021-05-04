@@ -111,12 +111,12 @@ res: $(foreach r,$(FILES_RES),$(BUILD_DIR)/res/$(r))
 
 $(BUILD_DIR)/res/%.h: ../../resources/%.gz
 	mkdir -p $(dir $@)
-	zcat $^ | xxd -i > $@.tmp
+	zcat $^ | od -An -tx1 -v | awk '{for(i=1;i<=NF;i++){printf "0x%s,",$$i}}' > $@.tmp
 	mv -f $@.tmp $@
 
 $(BUILD_DIR)/res/%.h: ../../resources/%
 	mkdir -p $(dir $@)
-	cat $^ | xxd -i > $@.tmp
+	cat $^ | od -An -tx1 -v | awk '{for(i=1;i<=NF;i++){printf "0x%s,",$$i}}' > $@.tmp
 	mv -f $@.tmp $@
 
 # --------------------------------------------------------------
