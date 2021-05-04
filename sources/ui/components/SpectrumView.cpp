@@ -285,25 +285,37 @@ void SpectrumView::displayBack()
     font.size = 14;
 
     ///
+    ColorRGBA8 gridLineColor = cp[Colors::spectrum_grid_lines];
+    ColorRGBA8 minorGridLineColor = cp[Colors::spectrum_minor_grid_lines];
+
     strokeWidth(1.0);
-    strokeColor(Colors::fromRGBA8(cp[Colors::spectrum_grid_lines]));
 
     int32_t midiKey = (int32_t)std::ceil(fKeyMin);
     while ((midiKey + 3) % 12 != 0) ++midiKey;
-    for (const double keyMax = fKeyMax; midiKey <= keyMax; midiKey += 12)
+    midiKey -= 11;
+    for (const double keyMax = fKeyMax; midiKey <= keyMax; midiKey += 1)
     {
+        bool isLaKey = midiKey % 12 == 9;
+
         double frequency = 440.0 * std::exp2((midiKey - 69) * (1.0 / 12.0));
         double x = xOfFrequency(frequency);
+
+        if (isLaKey)
+            strokeColor(Colors::fromRGBA8(gridLineColor));
+        else
+            strokeColor(Colors::fromRGBA8(minorGridLineColor));
 
         beginPath();
         moveTo((int)x + 0.5, 0.0);
         lineTo((int)x + 0.5, height);
         stroke();
 
-        translate(x - 4, height - 4);
-        rotate(-0.5 * M_PI);
-        fe.draw(std::to_string(std::lrint(frequency)).c_str(), font, 0, 0);
-        resetTransform();
+        if (isLaKey) {
+            translate(x - 4, height - 4);
+            rotate(-0.5 * M_PI);
+            fe.draw(std::to_string(std::lrint(frequency)).c_str(), font, 0, 0);
+            resetTransform();
+        }
     }
 
     ///
