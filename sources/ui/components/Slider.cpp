@@ -1,15 +1,13 @@
 #include "Slider.h"
 #include "Window.hpp"
-#include "Cairo.hpp"
 #include "ui/FontEngine.h"
 #include "ui/Geometry.h"
-#include "ui/Cairo++.h"
+#include "ui/NanoVGHelpers.h"
 #include "plugin/ColorPalette.h"
 
 ///
-Slider::Slider(Widget *group, FontEngine &fontEngine, ColorPalette &palette)
-    : Widget(group),
-      fFontEngine(fontEngine),
+Slider::Slider(Widget *group, const ColorPalette &palette)
+    : NanoWidget(group),
       fPalette(palette)
 {
 }
@@ -105,40 +103,44 @@ bool Slider::onScroll(const ScrollEvent &event)
     return false;
 }
 
-void Slider::onDisplay()
+void Slider::onNanoDisplay()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
-    FontEngine &fe = fFontEngine;
     const ColorPalette &cp = fPalette;
+    FontEngine fe(*this, cp);
 
     //
-    int w = getWidth();
-    int h = getHeight();
+    save();
 
     //
-    double v1 = fValueBound1;
-    double v2 = fValueBound2;
+    const int w = getWidth();
+    const int h = getHeight();
 
     //
-    double value = fValue;
-    double fill = 0;
+    const double v1 = fValueBound1;
+    const double v2 = fValueBound2;
+
+    //
+    const double value = fValue;
+    double fillValue = 0;
     if (v1 != v2)
-        fill = (value - v1) / (v2 - v1);
+        fillValue = (value - v1) / (v2 - v1);
 
     //
     const Rect bounds(0, 0, w, h);
-    cairo_rounded_rectangle(cr, bounds, 10.0);
-    cairo_set_source_rgba8(cr, cp[Colors::slider_back]);
-    cairo_fill(cr);
 
-    cairo_rectangle(cr, Rect{0, 0, (int)(fill * w), h});
-    cairo_clip(cr);
+    beginPath();
+    ::roundedRect(*this, bounds, 10.0);
+    fillColor(Colors::fromRGBA8(cp[Colors::slider_back]));
+    fill();
 
-    cairo_rounded_rectangle(cr, bounds, 10.0);
-    cairo_set_source_rgba8(cr, cp[Colors::slider_fill]);
-    cairo_fill(cr);
+    scissor(0.0, 0.0, (int)(fillValue * w), h);
 
-    cairo_reset_clip(cr);
+    beginPath();
+    ::roundedRect(*this, bounds, 10.0);
+    fillColor(Colors::fromRGBA8(cp[Colors::slider_fill]));
+    fill();
+
+    resetScissor();
 
     ///
     Font fontRegular;
@@ -152,7 +154,10 @@ void Slider::onDisplay()
     else
         text = std::to_string(value);
 
-    fe.drawInBox(cr, text.c_str(), fontRegular, bounds, kAlignCenter|kAlignInside);
+    fe.drawInBox(text.c_str(), fontRegular, bounds, kAlignCenter|kAlignInside);
+
+    //
+    restore();
 }
 
 double Slider::clampToBounds(double value)

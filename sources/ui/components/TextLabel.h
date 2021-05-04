@@ -1,10 +1,11 @@
 #pragma once
-#include "Widget.hpp"
+#include "NanoVG.hpp"
 #include "ui/FontEngine.h"
+class ColorPalette;
 
-class TextLabel : public Widget {
+class TextLabel : public NanoWidget {
 public:
-    TextLabel(Widget *group, FontEngine &fontEngine);
+    TextLabel(Widget *group, const ColorPalette &palette);
 
     const Font &font() const { return fFont; };
     void setFont(const Font &font);
@@ -16,10 +17,10 @@ public:
     void setAlignment(int align);
 
 protected:
-    void onDisplay() override;
+    void onNanoDisplay() override;
 
 private:
-    FontEngine &fFontEngine;
+    const ColorPalette &fPalette;
     Font fFont;
     std::string fText;
     int fAlign = kAlignLeft|kAlignTop|kAlignInside;

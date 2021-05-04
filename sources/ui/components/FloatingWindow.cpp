@@ -1,11 +1,9 @@
 #include "FloatingWindow.h"
-#include "ui/Cairo++.h"
 #include "plugin/ColorPalette.h"
 #include "Window.hpp"
-#include "Cairo.hpp"
 
 FloatingWindow::FloatingWindow(Widget *group, ColorPalette &palette)
-    : Widget(group),
+    : NanoWidget(group),
       fPalette(palette)
 {
 }
@@ -35,17 +33,17 @@ void FloatingWindow::setAllVisible(bool visible)
         w->setVisible(visible);
 }
 
-void FloatingWindow::onDisplay()
+void FloatingWindow::onNanoDisplay()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
     ColorPalette &cp = fPalette;
 
     double w = getWidth();
     double h = getHeight();
 
-    cairo_rounded_rectangle(cr, RectF{0.0, 0.0, w, h}, 10.0);
-    cairo_set_source_rgba8(cr, cp[Colors::floating_window_back]);
-    cairo_fill(cr);
+    beginPath();
+    roundedRect(0.0, 0.0, w, h, 10.0);
+    fillColor(Colors::fromRGBA8(cp[Colors::floating_window_back]));
+    fill();
 }
 
 void FloatingWindow::onPositionChanged(const PositionChangedEvent &ev)

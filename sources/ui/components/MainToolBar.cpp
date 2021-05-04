@@ -1,13 +1,11 @@
 #include "MainToolBar.h"
 #include "ui/FontEngine.h"
-#include "ui/Cairo++.h"
+#include "ui/NanoVGHelpers.h"
 #include "plugin/ColorPalette.h"
 #include "Window.hpp"
-#include "Cairo.hpp"
 
-MainToolBar::MainToolBar(Widget *group, FontEngine &fontEngine, ColorPalette &palette)
-    : Widget(group),
-      fFontEngine(fontEngine),
+MainToolBar::MainToolBar(Widget *group, ColorPalette &palette)
+    : NanoWidget(group),
       fPalette(palette)
 {
 }
@@ -48,18 +46,18 @@ float MainToolBar::getIdealWidth() const
     return rect.x + rect.w + 2.0;
 }
 
-void MainToolBar::onDisplay()
+void MainToolBar::onNanoDisplay()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
-    FontEngine &fe = fFontEngine;
     const ColorPalette &cp = fPalette;
+    FontEngine fe(*this, cp);
 
     const double w = getWidth();
     const double h = getHeight();
 
-    cairo_set_source_rgba8(cr, cp[Colors::tool_bar_back]);
-    cairo_rounded_rectangle_with_corners(cr, RectF{0.0, 0.0, w, h}, 10.0, RectangleSE);
-    cairo_fill(cr);
+    beginPath();
+    roundedRectWithCorners(*this, RectF{0, 0, w, h}, 10.0, RectangleSE);
+    fillColor(Colors::fromRGBA8(cp[Colors::tool_bar_back]));
+    fill();
 
     Font fontLabel;
     fontLabel.name = "regular";
@@ -82,8 +80,8 @@ void MainToolBar::onDisplay()
 
         switch (item.type) {
         case kTypeIcon:
-            fe.drawInBox(cr, item.icon.c_str(), !item.selected ? fontIcons : fontIconsSelected, rect, kAlignCenter|kAlignTop|kAlignInside);
-            fe.drawInBox(cr, item.label.c_str(), !item.selected ? fontLabel : fontLabelSelected, rect, kAlignCenter|kAlignBottom|kAlignInside);
+            fe.drawInBox(item.icon.c_str(), !item.selected ? fontIcons : fontIconsSelected, rect, kAlignCenter|kAlignTop|kAlignInside);
+            fe.drawInBox(item.label.c_str(), !item.selected ? fontLabel : fontLabelSelected, rect, kAlignCenter|kAlignBottom|kAlignInside);
             break;
         }
     }

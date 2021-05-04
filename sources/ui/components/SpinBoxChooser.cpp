@@ -1,13 +1,11 @@
 #include "SpinBoxChooser.h"
 #include "ui/FontEngine.h"
-#include "ui/Cairo++.h"
+#include "ui/NanoVGHelpers.h"
 #include "plugin/ColorPalette.h"
 #include "Window.hpp"
-#include "Cairo.hpp"
 
-SpinBoxChooser::SpinBoxChooser(Widget *group, FontEngine &fontEngine, ColorPalette &palette)
-    : Widget(group),
-      fFontEngine(fontEngine),
+SpinBoxChooser::SpinBoxChooser(Widget *group, const ColorPalette &palette)
+    : NanoWidget(group),
       fPalette(palette)
 {
     updateLayout();
@@ -77,11 +75,10 @@ void SpinBoxChooser::setValue(int32_t value)
         setValueIndex(i);
 }
 
-void SpinBoxChooser::onDisplay()
+void SpinBoxChooser::onNanoDisplay()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
-    FontEngine &fe = fFontEngine;
     const ColorPalette &cp = fPalette;
+    FontEngine fe(*this, cp);
 
     const int h = getHeight();
 
@@ -96,23 +93,26 @@ void SpinBoxChooser::onDisplay()
     fontRegular.color = cp[Colors::text_normal];
 
     ///
-    cairo_rounded_rectangle_with_corners(cr, fBoundsLeftButton, 10.0, RectangleNW|RectangleSW);
-    cairo_set_source_rgba8(cr, cp[Colors::spin_box_fill]);
-    cairo_fill(cr);
-    fe.drawInBox(cr, "\uf053", fontAwesome, fBoundsLeftButton, kAlignCenter|kAlignInside);
+    beginPath();
+    roundedRectWithCorners(*this, fBoundsLeftButton, 10.0, RectangleNW|RectangleSW);
+    fillColor(Colors::fromRGBA8(cp[Colors::spin_box_fill]));
+    fill();
+    fe.drawInBox("\uf053", fontAwesome, fBoundsLeftButton, kAlignCenter|kAlignInside);
 
     ///
-    cairo_rounded_rectangle_with_corners(cr, fBoundsRightButton, 10.0, RectangleNE|RectangleSE);
-    cairo_set_source_rgba8(cr, cp[Colors::spin_box_fill]);
-    cairo_fill(cr);
-    fe.drawInBox(cr, "\uf054", fontAwesome, fBoundsRightButton, kAlignCenter|kAlignInside);
+    beginPath();
+    roundedRectWithCorners(*this, fBoundsRightButton, 10.0, RectangleNE|RectangleSE);
+    fillColor(Colors::fromRGBA8(cp[Colors::spin_box_fill]));
+    fill();
+    fe.drawInBox("\uf054", fontAwesome, fBoundsRightButton, kAlignCenter|kAlignInside);
 
     ///
-    cairo_rectangle(cr, fBoundsCenterLabel);
-    cairo_set_source_rgba8(cr, cp[Colors::spin_box_back]);
-    cairo_fill(cr);
+    beginPath();
+    ::rect(*this, fBoundsCenterLabel);
+    fillColor(Colors::fromRGBA8(cp[Colors::spin_box_back]));
+    fill();
     if (!fChoices.empty())
-        fe.drawInBox(cr, fChoices[fValueIndex].second.c_str(), fontRegular, fBoundsCenterLabel, kAlignCenter|kAlignInside);
+        fe.drawInBox(fChoices[fValueIndex].second.c_str(), fontRegular, fBoundsCenterLabel, kAlignCenter|kAlignInside);
 }
 
 void SpinBoxChooser::onResize(const ResizeEvent &ev)

@@ -3,7 +3,6 @@
 #include "plugin/ColorPalette.h"
 #include "Color.hpp"
 #include "Window.hpp"
-#include "Cairo.hpp"
 #include <algorithm>
 #include <cassert>
 
@@ -19,9 +18,8 @@ static double ftom(double f)
 }
 
 ///
-SpectrumView::SpectrumView(Widget *parent, FontEngine &fontEngine, ColorPalette &palette)
-    : Widget(parent),
-      fFontEngine(fontEngine),
+SpectrumView::SpectrumView(Widget *parent, const ColorPalette &palette)
+    : NanoWidget(parent),
       fColorPalette(palette)
 {
 }
@@ -177,10 +175,9 @@ void SpectrumView::setReferenceLine(float key, float db)
     repaint();
 }
 
-void SpectrumView::onDisplay()
+void SpectrumView::onNanoDisplay()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
-    cairo_save(cr);
+    save();
 
     ///
     const uint32_t width = getWidth();
@@ -217,54 +214,62 @@ void SpectrumView::onDisplay()
         }
 
         // plot line
-        cairo_new_path(cr);
-        cairo_move_to(cr, points[0].x, points[0].y);
+        beginPath();
+        moveTo(points[0].x, points[0].y);
         for (uint32_t i = 1, n = points.size(); i < n; ++i)
-            cairo_line_to(cr, points[i].x, points[i].y);
-        cairo_set_line_width(cr, 1.0);
-        cairo_set_source_rgba8(cr, cp[Colors::spectrum_line_channel1 + channel]);
-        cairo_stroke_preserve(cr);
+            lineTo(points[i].x, points[i].y);
+        strokeWidth(1.0);
+        strokeColor(Colors::fromRGBA8(cp[Colors::spectrum_line_channel1 + channel]));
+        stroke();
 
         // plot fill
-        cairo_line_to(cr, points.back().x, height);
-        cairo_line_to(cr, points.front().x, height);
-        cairo_set_source_rgba8(cr, cp[Colors::spectrum_fill_channel1 + channel]);
-        cairo_fill(cr);
+        beginPath();
+        moveTo(points[0].x, points[0].y);
+        for (uint32_t i = 1, n = points.size(); i < n; ++i)
+            lineTo(points[i].x, points[i].y);
+        lineTo(points.back().x, height);
+        lineTo(points.front().x, height);
+        fillColor(Colors::fromRGBA8(cp[Colors::spectrum_fill_channel1 + channel]));
+        fill();
     }
 
     ///
     if (fHaveReferenceLine) {
         const double x = xOfKey(fKeyRef);
         const double y = yOfDbMag(fdBref);
-        cairo_set_line_width(cr, 1.0);
-        cairo_set_source_rgba8(cr, cp[Colors::spectrum_select_line]);
-        cairo_new_path(cr);
-        cairo_move_to(cr, 0, (int)y + 0.5);
-        cairo_line_to(cr, width, (int)y + 0.5);
-        cairo_stroke(cr);
-        cairo_move_to(cr, (int)x + 0.5, 0);
-        cairo_line_to(cr, (int)x + 0.5, height);
-        cairo_stroke(cr);
+
+        strokeWidth(1.0);
+        strokeColor(Colors::fromRGBA8(cp[Colors::spectrum_select_line]));
+
+        beginPath();
+        moveTo(0.0, (int)y + 0.5);
+        lineTo(width, (int)y + 0.5);
+        stroke();
+
+        beginPath();
+        moveTo((int)x + 0.5, 0);
+        lineTo((int)x + 0.5, height);
+        stroke();
     }
 
     ///
-    cairo_restore(cr);
+    restore();
 }
 
 void SpectrumView::displayBack()
 {
-    cairo_t *cr = getParentWindow().getGraphicsContext().cairo;
-    FontEngine &fe = fFontEngine;
     const ColorPalette &cp = fColorPalette;
+    FontEngine fe(*this, cp);
 
     ///
     const uint32_t width = getWidth();
     const uint32_t height = getHeight();
 
     ///
-    cairo_set_source_rgba8(cr, cp[Colors::spectrum_background]);
-    cairo_rectangle(cr, 0, 0, width, height);
-    cairo_fill(cr);
+    beginPath();
+    rect(0.0, 0.0, width, height);
+    fillColor(Colors::fromRGBA8(cp[Colors::spectrum_background]));
+    fill();
 
     ///
     Font font;
@@ -273,26 +278,28 @@ void SpectrumView::displayBack()
     font.size = 14;
 
     ///
-    cairo_set_line_width(cr, 1.0);
-    cairo_set_source_rgba8(cr, cp[Colors::spectrum_grid_lines]);
+    strokeWidth(1.0);
+    strokeColor(Colors::fromRGBA8(cp[Colors::spectrum_grid_lines]));
+
     int32_t midiKey = (int32_t)std::ceil(fKeyMin);
     while ((midiKey + 3) % 12 != 0) ++midiKey;
     for (const double keyMax = fKeyMax; midiKey <= keyMax; midiKey += 12)
     {
         double frequency = 440.0 * std::exp2((midiKey - 69) * (1.0 / 12.0));
         double x = xOfFrequency(frequency);
-        cairo_move_to(cr, (int)x + 0.5, 0);
-        cairo_line_to(cr, (int)x + 0.5, height);
-        cairo_stroke(cr);
 
-        cairo_matrix_t mat;
-        cairo_get_matrix(cr, &mat);
-        cairo_translate(cr, x - 4, height - 4);
-        cairo_rotate(cr, -0.5 * M_PI);
-        fe.draw(cr, std::to_string(std::lrint(frequency)).c_str(), font, 0, 0);
-        cairo_set_matrix(cr, &mat);
+        beginPath();
+        moveTo((int)x + 0.5, 0.0);
+        lineTo((int)x + 0.5, height);
+        stroke();
+
+        translate(x - 4, height - 4);
+        rotate(-0.5 * M_PI);
+        fe.draw(std::to_string(std::lrint(frequency)).c_str(), font, 0, 0);
+        resetTransform();
     }
 
+    ///
     const double dBmin = fdBmin;
     const double dBmax = fdBmax;
     constexpr double dBinterval = 20.0;
@@ -305,10 +312,11 @@ void SpectrumView::displayBack()
             break;
 
         double y = yOfDbMag(g);
-        cairo_move_to(cr, 0, (int)y + 0.5);
-        cairo_line_to(cr, width, (int)y + 0.5);
-        cairo_stroke(cr);
-        fe.drawInBox(cr, std::to_string(std::lrint(g)).c_str(), font, RectF(0, y + 4, width - 4, 0), kAlignTopRight|kAlignInside);
+        beginPath();
+        moveTo(0, (int)y + 0.5);
+        lineTo(width, (int)y + 0.5);
+        stroke();
+        fe.drawInBox(std::to_string(std::lrint(g)).c_str(), font, RectF(0, y + 4, width - 4, 0), kAlignTopRight|kAlignInside);
     }
 }
 

@@ -1,11 +1,11 @@
 #pragma once
-#include "Widget.hpp"
+#include "NanoVG.hpp"
 class ColorPalette;
 
-class SelectionRectangle : public Widget {
+class SelectionRectangle : public NanoWidget {
 public:
     explicit SelectionRectangle(Widget *group, ColorPalette &palette);
-    void onDisplay() override;
+    void onNanoDisplay() override;
 
 private:
     ColorPalette &fPalette;

@@ -1,15 +1,14 @@
 #pragma once
-#include "Widget.hpp"
+#include "NanoVG.hpp"
 #include "ui/Geometry.h"
 #include <string>
 #include <vector>
 #include <functional>
-class FontEngine;
 class ColorPalette;
 
-class SpinBoxChooser : public Widget {
+class SpinBoxChooser : public NanoWidget {
 public:
-    SpinBoxChooser(Widget *group, FontEngine &fontEngine, ColorPalette &palette);
+    SpinBoxChooser(Widget *group, const ColorPalette &palette);
     void clearChoices();
     void addChoice(int32_t value, const char *text);
 
@@ -24,7 +23,7 @@ public:
     std::function<void(int32_t)> ValueChangedCallback;
 
 protected:
-    void onDisplay() override;
+    void onNanoDisplay() override;
     void onResize(const ResizeEvent &ev) override;
     bool onMouse(const MouseEvent &ev) override;
 
@@ -34,8 +33,7 @@ private:
 private:
     int32_t fValueIndex = 0;
     std::vector<std::pair<int32_t, std::string>> fChoices;
-    FontEngine &fFontEngine;
-    ColorPalette &fPalette;
+    const ColorPalette &fPalette;
     Rect fBoundsLeftButton;
     Rect fBoundsRightButton;
     Rect fBoundsCenterLabel;

@@ -1,15 +1,14 @@
 #pragma once
-#include "Widget.hpp"
+#include "NanoVG.hpp"
 #include "spline/spline.h"
 #include <vector>
 #include <complex>
 #include <memory>
-class FontEngine;
 class ColorPalette;
 
-class SpectrumView : public Widget {
+class SpectrumView : public NanoWidget {
 public:
-    SpectrumView(Widget *parent, FontEngine &fontEngine, ColorPalette &palette);
+    SpectrumView(Widget *parent, const ColorPalette &palette);
 
     void setData(const float *frequencies, const float *magnitudes, uint32_t size, uint32_t numChannels);
     void toggleFreeze();
@@ -25,7 +24,7 @@ public:
     void clearReferenceLine();
     void setReferenceLine(float key, float db);
 
-    void onDisplay() override;
+    void onNanoDisplay() override;
 
 public:
     // coordinate <-> unit conversion
@@ -50,8 +49,7 @@ private:
     const Memory &getDisplayMemory() const { return fFreeze ? fFreezeMemory : fActiveMemory; }
 
 private:
-    FontEngine &fFontEngine;
-    ColorPalette &fColorPalette;
+    const ColorPalette &fColorPalette;
 
     struct Memory {
         uint32_t size;
