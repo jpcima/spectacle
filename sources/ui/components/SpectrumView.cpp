@@ -322,20 +322,34 @@ void SpectrumView::displayBack()
     const double dBmin = fdBmin;
     const double dBmax = fdBmax;
     constexpr double dBinterval = 20.0;
+    constexpr uint32_t dBsubdivs = 10;
 
     const double dBminAligned = std::round(dBmin / dBinterval) * dBinterval;
 
-    for (unsigned i = 0; ; ++i) {
-        double g = dBminAligned + dBinterval * i;
-        if (g > dBmax)
-            break;
+    bool dBgridEnd = false;
+    for (unsigned i = 0; !dBgridEnd; ++i) {
+        for (uint32_t j = 0; j < dBsubdivs; ++j) {
+            // draw preceding subdivs-1 minor lines, and then major line
 
-        double y = yOfDbMag(g);
-        beginPath();
-        moveTo(0, (int)y + 0.5);
-        lineTo(width, (int)y + 0.5);
-        stroke();
-        fe.drawInBox(std::to_string(std::lrint(g)).c_str(), font, RectF(0, y + 4, width - 4, 0), kAlignTopRight|kAlignInside);
+            double g = dBminAligned + dBinterval * (i - 1.0 + (j + 1.0) / dBsubdivs);
+            if (g > dBmax) {
+                dBgridEnd = true;
+                break;
+            }
+
+            if (j == dBsubdivs - 1)
+                strokeColor(Colors::fromRGBA8(gridLineColor));
+            else
+                strokeColor(Colors::fromRGBA8(minorGridLineColor));
+
+            double y = yOfDbMag(g);
+            beginPath();
+            moveTo(0, (int)y + 0.5);
+            lineTo(width, (int)y + 0.5);
+            stroke();
+            if (j == dBsubdivs - 1)
+                fe.drawInBox(std::to_string(std::lrint(g)).c_str(), font, RectF(0, y + 4, width - 4, 0), kAlignTopRight|kAlignInside);
+        }
     }
 }
 
