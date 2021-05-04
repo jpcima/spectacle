@@ -154,8 +154,8 @@ void ColorPalette::save_defaults(CSimpleIniA &ini, const char *section, bool ove
 
     fill_color(Colors::spectrum_background, "#202033", nullptr);
 
-    fill_color(Colors::spectrum_grid_text, "#4c4c4c80", nullptr);
-    fill_color(Colors::spectrum_grid_lines, "spectrum-grid-text", nullptr);
+    fill_color(Colors::spectrum_grid_text, "#ffffff80", nullptr);
+    fill_color(Colors::spectrum_grid_lines, "#6b6b6b80", nullptr);
 
     for (uint32_t channel = 0; channel < DISTRHO_PLUGIN_NUM_INPUTS; ++channel) {
         const ColorRGBA8 colorStroke = Colors::toRGBA8(
