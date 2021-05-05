@@ -92,7 +92,7 @@ UI_TYPE = opengl
 include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
-BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini
+BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/hiir-1.33
 LINK_FLAGS += -lfftw3f
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
