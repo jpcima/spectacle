@@ -1,6 +1,33 @@
 #pragma once
 #include <cstdint>
 
+enum Algorithm {
+    kAlgoStft,
+    kAlgoMultirateStftX2,
+    kAlgoMultirateStftX3,
+    kAlgoMultirateStftX4,
+    kAlgoMultirateStftX5,
+    kNumAlgorithms,
+};
+
+static constexpr Algorithm kDefaultAlgorithm = kAlgoMultirateStftX4;
+
+inline const char *getAlgorithmName(Algorithm a)
+{
+    switch (a) {
+    case kAlgoStft: default:
+        return "STFT";
+    case kAlgoMultirateStftX2:
+        return "STFT x2";
+    case kAlgoMultirateStftX3:
+        return "STFT x3";
+    case kAlgoMultirateStftX4:
+        return "STFT x4";
+    case kAlgoMultirateStftX5:
+        return "STFT x5";
+    }
+}
+
 static constexpr uint32_t kStftMinSizeLog2 = 8;
 static constexpr uint32_t kStftMaxSizeLog2 = 14;
 static constexpr uint32_t kStftDefaultSizeLog2 = 10;

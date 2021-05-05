@@ -22,6 +22,8 @@ protected:
     void configureBasic(uint32_t numBins);
 
 public:
+    virtual void configure(const Configuration &config) = 0;
+    virtual void setAttackAndRelease(float attack, float release) = 0;
     virtual void clear();
     virtual void process(const float *input, uint32_t numFrames) = 0;
 
@@ -50,9 +52,7 @@ protected:
     void configureStepping(uint32_t numBins, const Configuration &config);
 
 public:
-    void setAttackAndRelease(float attack, float release);
-
-    virtual void configure(const Configuration &config) = 0;
+    virtual void setAttackAndRelease(float attack, float release) override;
     virtual void clear() override;
     virtual void process(const float *input, uint32_t numFrames) override;
 

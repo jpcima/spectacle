@@ -120,11 +120,31 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fSetupWindow = makeSubwidget<FloatingWindow>(this, palette);
     fSetupWindow->setVisible(false);
-    fSetupWindow->setSize(260, 130);
+    fSetupWindow->setSize(260, 160);
     {
         int y = 10;
 
         TextLabel *label;
+
+
+        label = makeSubwidget<TextLabel>(fSetupWindow, palette);
+        label->setText("Algorithm");
+        label->setFont(fontLabel);
+        label->setAlignment(kAlignLeft|kAlignCenter|kAlignInside);
+        label->setAbsolutePos(10, y);
+        label->setSize(100, 20);
+        fSetupWindow->moveAlong(label);
+
+        fAlgorithmChooser = makeSubwidget<SpinBoxChooser>(fSetupWindow, palette);
+        fAlgorithmChooser->setSize(150, 20);
+        fAlgorithmChooser->setAbsolutePos(100, y);
+        for (uint32_t algo = 0; algo < kNumAlgorithms; ++algo)
+            fAlgorithmChooser->addChoice(algo, getAlgorithmName((Algorithm)algo));
+        fAlgorithmChooser->ValueChangedCallback = [this](int32_t value)
+            { setParameterValue(kPidAlgorithm, value); };
+        fSetupWindow->moveAlong(fAlgorithmChooser);
+
+        y += 30;
 
         label = makeSubwidget<TextLabel>(fSetupWindow, palette);
         label->setText("Resolution");
@@ -458,6 +478,9 @@ void UISpectralAnalyzer::parameterChanged(uint32_t index, float value)
         break;
     case kPidReleaseTime:
         fReleaseTimeSlider->setValue(value);
+        break;
+    case kPidAlgorithm:
+        fAlgorithmChooser->setValue(value);
         break;
     }
 }

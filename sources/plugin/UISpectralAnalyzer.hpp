@@ -90,6 +90,7 @@ private:
     MainToolBar *fMainToolBar = nullptr;
 
     FloatingWindow *fSetupWindow = nullptr;
+    SpinBoxChooser *fAlgorithmChooser = nullptr;
     SpinBoxChooser *fFftSizeChooser = nullptr;
     SpinBoxChooser *fStepSizeChooser = nullptr;
     Slider *fAttackTimeSlider = nullptr;

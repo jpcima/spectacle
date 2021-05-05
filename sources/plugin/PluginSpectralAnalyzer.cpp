@@ -27,6 +27,7 @@
 #include "PluginSpectralAnalyzer.hpp"
 #include "Parameters.h"
 #include "dsp/STFT.h"
+#include "dsp/MultirateSTFT.h"
 #include "dsp/AnalyzerDefs.h"
 #include "blink/DenormalDisabler.h"
 #include <memory>
@@ -120,6 +121,9 @@ void PluginSpectralAnalyzer::setParameterValue(uint32_t index, float value)
         for (uint32_t c = 0; c < kNumChannels; ++c)
             fStft[c]->setAttackAndRelease(fParameters[kPidAttackTime], fParameters[kPidReleaseTime]);
         break;
+    case kPidAlgorithm:
+        fMustReconfigureStft = true;
+        break;
     }
 }
 
@@ -157,14 +161,32 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
         config.releaseTime = fParameters[kPidReleaseTime];
 
         for (uint32_t c = 0; c < kNumChannels; ++c) {
-            SteppingAnalyzer &stft = *fStft[c];
-            stft.configure(config);
-            stft.clear();
+            BasicAnalyzer *stft;
+            switch ((Algorithm)fParameters[kPidAlgorithm]) {
+            case kAlgoStft: default:
+                stft = new STFT;
+                break;
+            case kAlgoMultirateStftX2:
+                stft = new MultirateSTFT<2>;
+                break;
+            case kAlgoMultirateStftX3:
+                stft = new MultirateSTFT<3>;
+                break;
+            case kAlgoMultirateStftX4:
+                stft = new MultirateSTFT<4>;
+                break;
+            case kAlgoMultirateStftX5:
+                stft = new MultirateSTFT<5>;
+                break;
+            }
+            fStft[c].reset(stft);
+            stft->configure(config);
+            stft->clear();
         }
     }
 
     for (uint32_t c = 0; c < kNumChannels; ++c) {
-        SteppingAnalyzer &stft = *fStft[c];
+        BasicAnalyzer &stft = *fStft[c];
         const float *input = inputs[c];
         stft.process(input, frames);
     }
@@ -177,7 +199,7 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
 
         numBins = fStft[0]->getNumBins();
         for (uint32_t c = 0; c < kNumChannels; ++c) {
-            SteppingAnalyzer &stft = *fStft[c];
+            BasicAnalyzer &stft = *fStft[c];
             freqs[c] = stft.getFrequencies();
             mags[c] = stft.getMagnitudes();
         }

@@ -64,7 +64,8 @@ FILES_DSP = \
 	sources/plugin/Parameters.cpp \
 	sources/dsp/FFTPlanner.cpp \
 	sources/dsp/SpectralAnalyzer.cpp \
-	sources/dsp/STFT.cpp
+	sources/dsp/STFT.cpp \
+	sources/dsp/MultirateSTFT.cpp
 
 FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \

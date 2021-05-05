@@ -7,7 +7,7 @@ void InitParameter(uint32_t index, Parameter &parameter)
 
     switch (index) {
     case kPidFftSize:
-        parameter.hints = kParameterIsAutomable|kParameterIsInteger;
+        parameter.hints = kParameterIsInteger;
         parameter.name = "Resolution";
         parameter.symbol = "resolution";
         parameter.ranges = ParameterRanges(kStftDefaultSizeLog2, kStftMinSizeLog2, kStftMaxSizeLog2);
@@ -19,7 +19,7 @@ void InitParameter(uint32_t index, Parameter &parameter)
         }
         break;
     case kPidStepSize:
-        parameter.hints = kParameterIsAutomable|kParameterIsInteger;
+        parameter.hints = kParameterIsInteger;
         parameter.name = "Step";
         parameter.symbol = "step";
         parameter.ranges = ParameterRanges(kStftDefaultStepLog2, kStftMinStepLog2, kStftMaxStepLog2);
@@ -43,6 +43,18 @@ void InitParameter(uint32_t index, Parameter &parameter)
         parameter.symbol = "release_time";
         parameter.ranges = ParameterRanges(kStftDefaultReleaseTime, kStftMinReleaseTime, kStftMaxReleaseTime);
         parameter.unit = "ms";
+        break;
+    case kPidAlgorithm:
+        parameter.hints = kParameterIsInteger;
+        parameter.name = "Algorithm";
+        parameter.symbol = "algorithm";
+        parameter.ranges = ParameterRanges(kDefaultAlgorithm, 0, kNumAlgorithms - 1);
+        parameter.enumValues.count = kNumAlgorithms;
+        parameter.enumValues.values = pev = new ParameterEnumerationValue[kNumAlgorithms];
+        for (uint32_t i = 0; i < kNumAlgorithms; ++i) {
+            pev[i].label = String(getAlgorithmName((Algorithm)i));
+            pev[i].value = i;
+        }
         break;
     }
 }
