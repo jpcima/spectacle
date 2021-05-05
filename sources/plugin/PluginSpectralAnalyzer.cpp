@@ -26,6 +26,7 @@
 
 #include "PluginSpectralAnalyzer.hpp"
 #include "Parameters.h"
+#include "dsp/STFT.h"
 #include "dsp/AnalyzerDefs.h"
 #include "blink/DenormalDisabler.h"
 #include <memory>
@@ -36,6 +37,9 @@ PluginSpectralAnalyzer::PluginSpectralAnalyzer()
       fParameters(new float[kParameterCount]),
       fParameterRanges(new ParameterRanges[kParameterCount])
 {
+    for (uint32_t c = 0; c < kNumChannels; ++c)
+        fStft[c].reset(new STFT);
+
     for (uint32_t i = 0; i < kParameterCount; ++i) {
         Parameter p;
         InitParameter(i, p);
@@ -83,7 +87,7 @@ void PluginSpectralAnalyzer::initProgramName(uint32_t index, String &programName
 void PluginSpectralAnalyzer::sampleRateChanged(double newSampleRate)
 {
     fSampleRate = newSampleRate;
-    fMustReconfigureStft = 1;
+    fMustReconfigureStft = true;
 }
 
 /**
@@ -106,10 +110,15 @@ void PluginSpectralAnalyzer::setParameterValue(uint32_t index, float value)
 
     switch (index) {
     case kPidFftSize:
+        fMustReconfigureStft = true;
+        break;
     case kPidStepSize:
-    case kPidReleaseTime:
+        fMustReconfigureStft = true;
+        break;
     case kPidAttackTime:
-        fMustReconfigureStft = 1;
+    case kPidReleaseTime:
+        for (uint32_t c = 0; c < kNumChannels; ++c)
+            fStft[c]->setAttackAndRelease(fParameters[kPidAttackTime], fParameters[kPidReleaseTime]);
         break;
     }
 }
@@ -130,42 +139,57 @@ void PluginSpectralAnalyzer::loadProgram(uint32_t index)
 
 void PluginSpectralAnalyzer::activate()
 {
-    fMustReconfigureStft = 1;
+    fMustReconfigureStft = true;
 }
 
 void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t frames)
 {
     WebCore::DenormalDisabler dd;
 
-    if (fMustReconfigureStft.exchange(0)) {
-        const double sampleRate = fSampleRate;
-        const uint32_t fftSize = 1u << (uint32_t)fParameters[kPidFftSize];
-        const uint32_t stepSize = 1u << (uint32_t)fParameters[kPidStepSize];
-        const float attackTime = fParameters[kPidAttackTime];
-        const float releaseTime = fParameters[kPidReleaseTime];
-        for (STFT &stft : fStft)
-            stft.configure(fftSize, stepSize, attackTime, releaseTime, sampleRate);
+    if (fMustReconfigureStft) {
+        fMustReconfigureStft = false;
+
+        Configuration config;
+        config.sampleRate = fSampleRate;
+        config.windowSize = 1u << (uint32_t)fParameters[kPidFftSize];
+        config.stepSize = 1u << (uint32_t)fParameters[kPidStepSize];
+        config.attackTime = fParameters[kPidAttackTime];
+        config.releaseTime = fParameters[kPidReleaseTime];
+
+        for (uint32_t c = 0; c < kNumChannels; ++c) {
+            SteppingAnalyzer &stft = *fStft[c];
+            stft.configure(config);
+            stft.clear();
+        }
     }
 
     for (uint32_t c = 0; c < kNumChannels; ++c) {
-        STFT &stft = fStft[c];
+        SteppingAnalyzer &stft = *fStft[c];
         const float *input = inputs[c];
         stft.process(input, frames);
     }
 
     std::unique_lock<std::mutex> sendLock(fSendMutex, std::try_to_lock);
     if (sendLock.owns_lock()) {
-        const uint32_t fftSize = fStft[0].getFftSize();
-        const uint32_t specSize = fftSize / 2 + 1;
-        fSendSize = specSize;
+        uint32_t numBins;
+        const float* freqs[kNumChannels] = {};
+        const float* mags[kNumChannels] = {};
+
+        numBins = fStft[0]->getNumBins();
         for (uint32_t c = 0; c < kNumChannels; ++c) {
-            STFT &stft = fStft[c];
+            SteppingAnalyzer &stft = *fStft[c];
+            freqs[c] = stft.getFrequencies();
+            mags[c] = stft.getMagnitudes();
+        }
+
+        for (uint32_t c = 0; c < kNumChannels; ++c) {
+            fSendSize = numBins;
             std::memcpy(
-                &fSendFrequencies[c * specSize], stft.getFrequencies(),
-                specSize * sizeof(float));
+                &fSendFrequencies[c * numBins], freqs[c],
+                numBins * sizeof(float));
             std::memcpy(
-                &fSendMagnitudes[c * specSize], stft.getMagnitudes(),
-                specSize * sizeof(float));
+                &fSendMagnitudes[c * numBins], mags[c],
+                numBins * sizeof(float));
         }
     }
 

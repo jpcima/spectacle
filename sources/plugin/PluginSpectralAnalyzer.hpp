@@ -26,10 +26,9 @@
 
 #pragma once
 #include "DistrhoPlugin.hpp"
-#include "dsp/STFT.h"
+#include "dsp/SpectralAnalyzer.h"
 #include <mutex>
 #include <memory>
-#include <atomic>
 
 class PluginSpectralAnalyzer : public Plugin {
 public:
@@ -120,8 +119,8 @@ private:
 
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
-    STFT fStft[kNumChannels];
-    std::atomic<int> fMustReconfigureStft {0};
+    std::unique_ptr<SteppingAnalyzer> fStft[kNumChannels];
+    bool fMustReconfigureStft = false;
 
     const std::unique_ptr<float[]> fParameters;
     const std::unique_ptr<ParameterRanges[]> fParameterRanges;

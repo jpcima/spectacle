@@ -1,155 +1,40 @@
 #include "STFT.h"
+#include "FFTPlanner.h"
 #include "AnalyzerDefs.h"
 #include <algorithm>
 #include <unordered_map>
 #include <mutex>
 #include <cmath>
 
-STFT::STFT()
+void STFT::configure(const Configuration &config)
 {
-    _ring.reserve(kStftMaxSize);
-    _real.reserve(kStftMaxSize);
-    _cpx.reserve(kStftMaxSize / 2 + 1);
-    _window.reserve(kStftMaxSize);
-    _arSmooth.reserve(kStftMaxSize / 2 + 1);
+    const uint32_t windowSize = config.windowSize;
+    const uint32_t numBins = windowSize / 2 + 1;
+    configureStepping(numBins, config);
 
-    for (uint32_t size = kStftMinSize; size <= kStftMaxSize; size <<= 1)
-        prepareFFT(size);
+    const double sampleRate = config.sampleRate;
+    _sampleRate = sampleRate;
+    _fftPlan = FFTPlanner::getInstance().forwardFFT(windowSize);
+    _cpx.resize(numBins);
 
-    configure(kStftDefaultSize, kStftDefaultStep, kStftDefaultAttackTime, kStftDefaultReleaseTime, 44100.0);
+    float *frequencies = getFrequencies();
+    for (uint32_t i = 0; i < numBins; ++i)
+        frequencies[i] = (float)(i * sampleRate / windowSize);
 }
 
-STFT::~STFT()
+void STFT::processNewBlock(float *input)
 {
-}
-
-void STFT::configure(uint32_t fftSize, uint32_t stepSize, double attackTime, double releaseTime, double sampleRate)
-{
-    if (_fftSize != fftSize || _sampleRate != sampleRate) {
-        _fftPlan = prepareFFT(fftSize);
-        _sampleRate = sampleRate;
-        _fftSize = fftSize;
-        _ring.resize(2 * fftSize);
-        _real.resize(fftSize);
-        _cpx.resize(fftSize / 2 + 1);
-        _window.resize(fftSize);
-        _outputFrequencies.resize(fftSize / 2 + 1);
-        _outputMagnitudes.resize(fftSize / 2 + 1);
-        _arSmooth.resize(fftSize / 2 + 1);
-
-        float *window = _window.data();
-        for (uint32_t i = 0; i < fftSize; ++i)
-            window[i] = 0.5 * (1.0 - std::cos(2.0 * M_PI * i / (fftSize - 1)));
-
-        float *frequencies = _outputFrequencies.data();
-        for (uint32_t i = 0; i < fftSize / 2 + 1; ++i)
-            frequencies[i] = i * (float)(sampleRate / fftSize);
-
-        clear();
-    }
-    else {
-        _stepCounter = 0;
-        _ringIndex = 0;
-    }
-
-    _stepSize = stepSize;
-
-    ARFollower *ar = _arSmooth.data();
-    ar[0].init(sampleRate);
-    ar[0].setAttackTime(attackTime / stepSize);
-    ar[0].setReleaseTime(releaseTime / stepSize);
-    for (uint32_t i = 1; i < fftSize / 2 + 1; ++i)
-        ar[i].configureLike(ar[0]);
-}
-
-void STFT::clear()
-{
-    _stepCounter = 0;
-    _ringIndex = 0;
-    std::fill(_ring.begin(), _ring.end(), 0.0f);
-    std::fill(
-        _outputMagnitudes.begin(), _outputMagnitudes.end(),
-        20.0 * std::log10(kStftFloorMagnitude));
-
-    const uint32_t fftSize = _fftSize;
-
-    ARFollower *ar = _arSmooth.data();
-    for (uint32_t i = 0; i < fftSize / 2 + 1; ++i)
-        ar[i].clear();
-}
-
-void STFT::process(const float *input, uint32_t numFrames)
-{
-    const uint32_t fftSize = _fftSize;
-
-    uint32_t stepCounter = _stepCounter;
-    const uint32_t stepSize = _stepSize;
-
-    float *ring = _ring.data();
-    uint32_t ringIndex = _ringIndex;
-
-    for (uint32_t i = 0; i < numFrames; ++i) {
-        ring[ringIndex] = ring[ringIndex + fftSize] = input[i];
-        ringIndex = (ringIndex + 1 != fftSize) ? (ringIndex + 1) : 0;
-        if (++stepCounter == stepSize) {
-            stepCounter = 0;
-            processNewWindow(&ring[ringIndex]);
-        }
-    }
-
-    _stepCounter = stepCounter;
-    _ringIndex = ringIndex;
-}
-
-void STFT::processNewWindow(const float *rawInput)
-{
-    const uint32_t fftSize = _fftSize;
-    const float *window = _window.data();
-
-    float *real = _real.data();
-    for (uint32_t i = 0; i < fftSize; ++i)
-        real[i] = window[i] * rawInput[i];
+    const uint32_t windowSize = getWindowSize();
+    const uint32_t numBins = windowSize / 2 + 1;
 
     fftwf_plan plan = _fftPlan;
     std::complex<float> *cpx = _cpx.data();
-    fftwf_execute_dft_r2c(plan, real, (fftwf_complex *)cpx);
+    fftwf_execute_dft_r2c(plan, input, (fftwf_complex *)cpx);
 
-    float *mag = _outputMagnitudes.data();
-    ARFollower *ar = _arSmooth.data();
-    for (uint32_t i = 0; i < fftSize / 2 + 1; ++i) {
-        double curMag = std::abs(cpx[i]) * (2.0f / fftSize);
-        if (kOutputNoDcComponent && i == 0)
-            curMag = kStftFloorMagnitude;
-        if (kOutputAsDecibels)
-            curMag = 20.0 * std::log10(std::max(kStftFloorMagnitude, (double)curMag));
-        mag[i] = ar[i].compute(curMag);
+    float *mag = getMagnitudes();
+    for (uint32_t i = 0; i < numBins; ++i) {
+        double linear = std::abs(cpx[i]) * (2.0f / windowSize);
+        double decibel = 20.0 * std::log10(std::max(kStftFloorMagnitude, linear));
+        mag[i] = decibel;
     }
 }
-
-static std::mutex _fftMutex;
-static std::unordered_map<uint32_t, fftwf_plan_u> _fftPlans;
-
-fftwf_plan STFT::prepareFFT(uint32_t fftSize)
-{
-    std::unique_lock<std::mutex> lock(_fftMutex);
-
-    auto it = _fftPlans.find(fftSize);
-    if (it != _fftPlans.end())
-        return it->second.get();
-
-    fftwf_real_vector real(fftSize);
-    fftwf_complex_vector cpx(fftSize / 2 + 1);
-
-    int planFlags = 0;
-#if defined(USE_IMPATIENT_FFT_PLANNING)
-    planFlags |= FFTW_ESTIMATE;
-#else
-    planFlags |= FFTW_MEASURE;
-#endif
-    fftwf_plan plan = fftwf_plan_dft_r2c_1d(fftSize, real.data(), (fftwf_complex *)cpx.data(), planFlags);
-    _fftPlans[fftSize] = fftwf_plan_u(plan);
-    return plan;
-}
-
-constexpr bool STFT::kOutputAsDecibels;
-constexpr bool STFT::kOutputNoDcComponent;

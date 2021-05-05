@@ -62,6 +62,8 @@ BUILD_LADSPA ?= false
 FILES_DSP = \
 	sources/plugin/PluginSpectralAnalyzer.cpp \
 	sources/plugin/Parameters.cpp \
+	sources/dsp/FFTPlanner.cpp \
+	sources/dsp/SpectralAnalyzer.cpp \
 	sources/dsp/STFT.cpp
 
 FILES_UI = \
