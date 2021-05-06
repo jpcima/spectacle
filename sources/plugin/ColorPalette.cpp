@@ -154,7 +154,7 @@ void ColorPalette::save_defaults(CSimpleIniA &ini, const char *section, bool ove
     fill_color(Colors::spectrum_line_channel1 + 1, "#e88710", nullptr);
     fill_color(Colors::spectrum_fill_channel1 + 1, "#e8871000", nullptr);
 
-    fill_color(Colors::spectrum_select_line, "#ffaa0040", nullptr);
+    fill_color(Colors::spectrum_select_line, "#ffffffc0", nullptr);
 
     fill_color(Colors::slider_back, "#26262680", nullptr);
     fill_color(Colors::slider_fill, "#69696980", nullptr);
