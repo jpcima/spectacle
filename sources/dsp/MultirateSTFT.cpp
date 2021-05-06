@@ -21,6 +21,7 @@ void MultirateSTFT<Rates>::configure(const Configuration &config)
         rateConfig[r].sampleRate = config.sampleRate / (1u << r);
         fStft[r].configure(rateConfig[r]);
 
+        // skip processing the bins we don't need and their smoothers
         if (r == Rates - 1)
             fStft[r].configureBinRange(0, specSize);
         else
@@ -33,8 +34,6 @@ void MultirateSTFT<Rates>::configure(const Configuration &config)
 
     fBinMapping.resize(numBins);
     BinMapping *binMappings = fBinMapping.data();
-
-    // TODO skip processing the bins we don't need and their smoothers 
 
     for (uint32_t r = Rates; r-- > 0;) {
         double sampleRate = rateConfig[r].sampleRate;
