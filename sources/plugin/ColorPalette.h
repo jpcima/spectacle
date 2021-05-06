@@ -55,6 +55,7 @@ namespace Colors {
         floating_window_back,
         tool_bar_back,
         selection_rectangle,
+        resize_handle,
     };
 
     maybe_unused static const char *Name[] = {
@@ -78,6 +79,7 @@ namespace Colors {
         "floating-window-back",
         "tool-bar-back",
         "selection-rectangle",
+        "resize-handle",
         #if DISTRHO_PLUGIN_NUM_INPUTS != 2
         #  error currently the name list assumes channels = 2
         #endif

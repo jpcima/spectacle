@@ -39,6 +39,7 @@ class SpinBoxChooser;
 class Slider;
 class TextLabel;
 class SelectionRectangle;
+class ResizeHandle;
 class ColorPalette;
 
 class UISpectralAnalyzer : public UI, MainToolBar::Listener {
@@ -114,6 +115,8 @@ private:
     FloatingWindow *fColorWindow = nullptr;
     SpinBoxChooser *fThemeChooser = nullptr;
     SpinBoxChooser *fThemeEditChooser = nullptr;
+
+    ResizeHandle *fResizeHandle = nullptr;
 
     std::vector<std::unique_ptr<Widget>> fSubWidgets;
 

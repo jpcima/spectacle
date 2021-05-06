@@ -34,6 +34,7 @@
 #include "ui/components/Slider.h"
 #include "ui/components/TextLabel.h"
 #include "ui/components/SelectionRectangle.h"
+#include "ui/components/ResizeHandle.h"
 #include "ui/FontEngine.h"
 #include "dsp/AnalyzerDefs.h"
 #include "util/format_string.h"
@@ -445,6 +446,9 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fSelectionRectangle = makeSubwidget<SelectionRectangle>(this, palette);
     fSelectionRectangle->setVisible(false);
 
+    fResizeHandle = makeSubwidget<ResizeHandle>(this, palette);
+    fResizeHandle->setSize(20, 20);
+
     uiReshape(getWidth(), getHeight());
 }
 
@@ -556,6 +560,9 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
         // TODO(jpc) I'd rather move the window relative to nearest corner
         win->repositionWithinLimits();
     }
+
+    fResizeHandle->setAbsolutePos(
+        width - fResizeHandle->getWidth(), height - fResizeHandle->getHeight());
 }
 
 // -----------------------------------------------------------------------

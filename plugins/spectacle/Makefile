@@ -80,6 +80,7 @@ FILES_UI = \
 	sources/ui/components/Slider.cpp \
 	sources/ui/components/TextLabel.cpp \
 	sources/ui/components/SelectionRectangle.cpp \
+	sources/ui/components/ResizeHandle.cpp \
 	sources/ui/FontEngine.cpp \
 	sources/util/format_string.cpp \
 	thirdparty/spline/spline/spline.cpp \

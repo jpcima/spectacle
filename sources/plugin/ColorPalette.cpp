@@ -166,4 +166,6 @@ void ColorPalette::save_defaults(CSimpleIniA &ini, const char *section, bool ove
     fill_color(Colors::tool_bar_back, "floating-window-back", nullptr);
 
     fill_color(Colors::selection_rectangle, "text-normal", nullptr);
+
+    fill_color(Colors::resize_handle, "text-normal", nullptr);
 }
