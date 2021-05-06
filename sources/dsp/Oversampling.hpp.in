@@ -1,0 +1,88 @@
+#pragma once
+#include "Oversampling.h"
+#include "OversamplingCoefs.h"
+#include <hiir/Upsampler2xFpu.h>
+#include <hiir/Downsampler2xFpu.h>
+
+{% set MaxLog2Factor = 7 -%}
+
+{%- for F in range(1, MaxLog2Factor + 1) %}
+///
+struct UpsamplerStage{{2**F}}x : public hiir::Upsampler2xFpu<NC{{2**F}}x> {
+    UpsamplerStage{{2**F}}x() { set_coefs(C{{2**F}}x); }
+};
+
+///
+template <>
+class Upsampler<{{F}}> final : public BasicUpsampler {
+public:
+    enum {
+        Factor = {{2**F}},
+        Log2Factor = {{F}},
+    };
+
+    void upsample(uint32_t count, const float *input, float **outputs) override
+    {
+        {%- for I in range(1, F + 1) %}
+        _stage{{2**I}}x.process_block({# -#}
+            outputs[{{loop.index0}}], {# -#}
+            {% if loop.first %}input,{% else %}outputs[{{loop.index0-1}}],{% endif %} {# -#}
+            count{% if not loop.first %} * {{2**(I-1)}}{% endif %});
+        {%- endfor %}
+    }
+
+    void clear() override
+    {
+        {%- for I in range(1, F + 1) %}
+        _stage{{2**I}}x.clear_buffers();
+        {%- endfor %}
+    }
+
+private:
+    {%- for I in range(1, F + 1) %}
+    UpsamplerStage{{2**I}}x _stage{{2**I}}x;
+    {%- endfor %}
+};
+
+using Upsampler{{2**F}}x = Upsampler<{{F}}>;
+{% endfor %}
+
+{%- for F in range(1, MaxLog2Factor + 1) %}
+///
+struct DownsamplerStage{{2**F}}x : public hiir::Downsampler2xFpu<NC{{2**F}}x> {
+    DownsamplerStage{{2**F}}x() { set_coefs(C{{2**F}}x); }
+};
+
+template <>
+class Downsampler<{{F}}> final : public BasicDownsampler {
+public:
+    enum {
+        Factor = {{2**F}},
+        Log2Factor = {{F}},
+    };
+
+    void downsample(uint32_t count, const float *input, float **outputs) override
+    {
+        {%- for I in range(1, F + 1) %}
+        _stage{{2**I}}x.process_block({# -#}
+            outputs[{{loop.index0}}], {# -#}
+            {% if loop.first %}input,{% else %}outputs[{{loop.index0-1}}],{% endif %} {# -#}
+            count{% if not loop.last %} * {{2**(F-I)}}{% endif %});
+        {%- endfor %}
+    }
+
+    void clear() override
+    {
+        {%- for I in range(1, F + 1) %}
+        _stage{{2**I}}x.clear_buffers();
+        {%- endfor %}
+    }
+
+private:
+    {%- for I in range(1, F + 1) %}
+    DownsamplerStage{{2**I}}x _stage{{2**I}}x;
+    {%- endfor %}
+};
+
+using Downsampler{{2**F}}x = Downsampler<{{F}}>;
+{% endfor -%}
