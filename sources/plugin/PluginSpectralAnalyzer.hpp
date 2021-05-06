@@ -28,6 +28,9 @@
 #include "DistrhoPlugin.hpp"
 #include "dsp/SpectralAnalyzer.h"
 #include <SpinMutex.h>
+#include <RTSemaphore.h>
+#include <atomic>
+#include <thread>
 #include <mutex>
 #include <memory>
 
@@ -107,6 +110,11 @@ protected:
 
     // -------------------------------------------------------------------
 
+private:
+    void runThread();
+
+    // -------------------------------------------------------------------
+
 public:
     SpinMutex fSendMutex;
     uint32_t fSendSize = 0;
@@ -121,10 +129,16 @@ private:
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
     std::unique_ptr<BasicAnalyzer> fStft[kNumChannels];
-    bool fMustReconfigureStft = false;
+    SpinMutex fStftMutex;
+
+    std::atomic<bool> fMustReconfigureEnvelope { false };
 
     const std::unique_ptr<float[]> fParameters;
     const std::unique_ptr<ParameterRanges[]> fParameterRanges;
+
+    std::thread fThread;
+    RTSemaphore fThreadSem;
+    volatile bool fThreadQuit = false;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginSpectralAnalyzer)
 };

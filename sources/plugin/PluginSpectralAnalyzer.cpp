@@ -54,10 +54,15 @@ PluginSpectralAnalyzer::PluginSpectralAnalyzer()
     fSendMagnitudes.resize(kNumChannels * specMaxSize);
 
     sampleRateChanged(getSampleRate());
+
+    fThread = std::thread([this]() { runThread(); });
 }
 
 PluginSpectralAnalyzer::~PluginSpectralAnalyzer()
 {
+    fThreadQuit = true;
+    fThreadSem.post();
+    fThread.join();
 }
 
 // -----------------------------------------------------------------------
@@ -89,7 +94,7 @@ void PluginSpectralAnalyzer::initProgramName(uint32_t index, String &programName
 void PluginSpectralAnalyzer::sampleRateChanged(double newSampleRate)
 {
     fSampleRate = newSampleRate;
-    fMustReconfigureStft = true;
+    fThreadSem.post();
 }
 
 /**
@@ -112,18 +117,13 @@ void PluginSpectralAnalyzer::setParameterValue(uint32_t index, float value)
 
     switch (index) {
     case kPidFftSize:
-        fMustReconfigureStft = true;
-        break;
     case kPidStepSize:
-        fMustReconfigureStft = true;
+    case kPidAlgorithm:
+        fThreadSem.post();
         break;
     case kPidAttackTime:
     case kPidReleaseTime:
-        for (uint32_t c = 0; c < kNumChannels; ++c)
-            fStft[c]->setAttackAndRelease(fParameters[kPidAttackTime], fParameters[kPidReleaseTime]);
-        break;
-    case kPidAlgorithm:
-        fMustReconfigureStft = true;
+        fMustReconfigureEnvelope.store(true);
         break;
     }
 }
@@ -152,15 +152,69 @@ void PluginSpectralAnalyzer::activate()
     }
 #endif
 
-    fMustReconfigureStft = true;
+    fThreadSem.post();
 }
 
 void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t frames)
 {
     WebCore::DenormalDisabler dd;
 
-    if (fMustReconfigureStft) {
-        fMustReconfigureStft = false;
+    std::unique_lock<SpinMutex> stftLock(fStftMutex, std::try_to_lock);
+
+    if (stftLock.owns_lock()) {
+        if (fMustReconfigureEnvelope.exchange(false)) {
+            for (uint32_t c = 0; c < kNumChannels; ++c)
+                fStft[c]->setAttackAndRelease(fParameters[kPidAttackTime], fParameters[kPidReleaseTime]);
+        }
+
+        for (uint32_t c = 0; c < kNumChannels; ++c) {
+            BasicAnalyzer &stft = *fStft[c];
+            const float *input = inputs[c];
+            stft.process(input, frames);
+        }
+
+        std::unique_lock<SpinMutex> sendLock(fSendMutex, std::try_to_lock);
+        if (sendLock.owns_lock()) {
+            uint32_t numBins;
+            const float* freqs[kNumChannels] = {};
+            const float* mags[kNumChannels] = {};
+
+            numBins = fStft[0]->getNumBins();
+            for (uint32_t c = 0; c < kNumChannels; ++c) {
+                BasicAnalyzer &stft = *fStft[c];
+                freqs[c] = stft.getFrequencies();
+                mags[c] = stft.getMagnitudes();
+            }
+
+            for (uint32_t c = 0; c < kNumChannels; ++c) {
+                fSendSize = numBins;
+                std::memcpy(
+                    &fSendFrequencies[c * numBins], freqs[c],
+                    numBins * sizeof(float));
+                std::memcpy(
+                    &fSendMagnitudes[c * numBins], mags[c],
+                    numBins * sizeof(float));
+            }
+        }
+    }
+
+    for (uint32_t c = 0; c < kNumChannels; ++c) {
+        if (inputs[c] != outputs[c])
+            std::memcpy(outputs[c], inputs[c], frames * sizeof(float));
+    }
+}
+
+// -----------------------------------------------------------------------
+
+void PluginSpectralAnalyzer::runThread()
+{
+    for (;;) {
+        for (fThreadSem.wait(); fThreadSem.try_wait(); );
+
+        if (fThreadQuit)
+            break;
+
+        std::lock_guard<SpinMutex> lock(fStftMutex);
 
         Configuration config;
         config.sampleRate = fSampleRate;
@@ -201,41 +255,6 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
             stft->configure(config);
             stft->clear();
         }
-    }
-
-    for (uint32_t c = 0; c < kNumChannels; ++c) {
-        BasicAnalyzer &stft = *fStft[c];
-        const float *input = inputs[c];
-        stft.process(input, frames);
-    }
-
-    std::unique_lock<SpinMutex> sendLock(fSendMutex, std::try_to_lock);
-    if (sendLock.owns_lock()) {
-        uint32_t numBins;
-        const float* freqs[kNumChannels] = {};
-        const float* mags[kNumChannels] = {};
-
-        numBins = fStft[0]->getNumBins();
-        for (uint32_t c = 0; c < kNumChannels; ++c) {
-            BasicAnalyzer &stft = *fStft[c];
-            freqs[c] = stft.getFrequencies();
-            mags[c] = stft.getMagnitudes();
-        }
-
-        for (uint32_t c = 0; c < kNumChannels; ++c) {
-            fSendSize = numBins;
-            std::memcpy(
-                &fSendFrequencies[c * numBins], freqs[c],
-                numBins * sizeof(float));
-            std::memcpy(
-                &fSendMagnitudes[c * numBins], mags[c],
-                numBins * sizeof(float));
-        }
-    }
-
-    for (uint32_t c = 0; c < kNumChannels; ++c) {
-        if (inputs[c] != outputs[c])
-            std::memcpy(outputs[c], inputs[c], frames * sizeof(float));
     }
 }
 
