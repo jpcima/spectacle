@@ -47,11 +47,13 @@ public:
 
 public:
     uint32_t getWindowSize() const { return _windowSize; }
+    const uint32_t *getBinRange() const { return _binRange; }
 
 protected:
     void configureStepping(uint32_t numBins, const Configuration &config);
 
 public:
+    virtual void configureBinRange(uint32_t start, uint32_t end);
     virtual void setAttackAndRelease(float attack, float release) override;
     virtual void clear() override;
     virtual void process(const float *input, uint32_t numFrames) override;
@@ -72,6 +74,9 @@ private:
     uint32_t _ringIndex {};
     std::vector<float> _ring;
 
+    // range
+    uint32_t _binRange[2] = { 0u, ~0u };
+
     // temporary
     std::vector<float> _input;
 
@@ -79,12 +84,14 @@ private:
     class Smoother {
     public:
         void configure(uint32_t numBins, uint32_t stepSize, double attackTime, double releaseTime, double sampleRate);
+        void configureBinRange(uint32_t start, uint32_t end);
         void setAttackAndRelease(float attack, float release);
         void clear();
         void process(float *stepData);
     private:
         std::vector<ARFollower> _ar;
         uint32_t _stepSize = 0;
+        uint32_t _binRange[2] = { 0u, ~0u };
     };
     Smoother _smoother;
 };

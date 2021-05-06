@@ -2,8 +2,6 @@
 #include "FFTPlanner.h"
 #include "AnalyzerDefs.h"
 #include <algorithm>
-#include <unordered_map>
-#include <mutex>
 #include <cmath>
 
 void STFT::configure(const Configuration &config)
@@ -31,8 +29,12 @@ void STFT::processNewBlock(float *input)
     std::complex<float> *cpx = _cpx.data();
     fftwf_execute_dft_r2c(plan, input, (fftwf_complex *)cpx);
 
+    const uint32_t *binRange = getBinRange();
+    uint32_t start = binRange[0];
+    uint32_t end = std::min(binRange[1], numBins);
+
     float *mag = getMagnitudes();
-    for (uint32_t i = 0; i < numBins; ++i) {
+    for (uint32_t i = start; i < end; ++i) {
         double linear = std::abs(cpx[i]) * (2.0f / windowSize);
         double decibel = 20.0 * std::log10(std::max(kStftFloorMagnitude, linear));
         mag[i] = decibel;

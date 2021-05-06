@@ -36,6 +36,13 @@ void SteppingAnalyzer::configureStepping(uint32_t numBins, const Configuration &
     _smoother.configure(numBins, config.stepSize, config.attackTime, config.releaseTime, config.sampleRate);
 }
 
+void SteppingAnalyzer::configureBinRange(uint32_t start, uint32_t end)
+{
+    _binRange[0] = start;
+    _binRange[1] = end;
+    _smoother.configureBinRange(start, end);
+}
+
 void SteppingAnalyzer::setAttackAndRelease(float attack, float release)
 {
     _smoother.setAttackAndRelease(attack, release);
@@ -92,6 +99,12 @@ void SteppingAnalyzer::Smoother::configure(uint32_t numBins, uint32_t stepSize, 
     setAttackAndRelease(attackTime, releaseTime);
 }
 
+void SteppingAnalyzer::Smoother::configureBinRange(uint32_t start, uint32_t end)
+{
+    _binRange[0] = start;
+    _binRange[1] = end;
+}
+
 void SteppingAnalyzer::Smoother::setAttackAndRelease(float attack, float release)
 {
     ARFollower *ar = _ar.data();
@@ -115,6 +128,10 @@ void SteppingAnalyzer::Smoother::process(float *stepData)
 {
     ARFollower *ar = _ar.data();
     uint32_t numBins = (uint32_t)_ar.size();
-    for (uint32_t i = 0; i < numBins; ++i)
+
+    uint32_t start = _binRange[0];
+    uint32_t end = std::min(_binRange[1], numBins);
+
+    for (uint32_t i = start; i < end; ++i)
         stepData[i] = ar[i].compute(stepData[i]);
 }

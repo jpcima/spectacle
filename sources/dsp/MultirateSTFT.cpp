@@ -20,6 +20,11 @@ void MultirateSTFT<Rates>::configure(const Configuration &config)
         rateConfig[r].stepSize = config.stepSize / (1u << r);
         rateConfig[r].sampleRate = config.sampleRate / (1u << r);
         fStft[r].configure(rateConfig[r]);
+
+        if (r == Rates - 1)
+            fStft[r].configureBinRange(0, specSize);
+        else
+            fStft[r].configureBinRange(specSize / 2, specSize);
     }
 
     //
