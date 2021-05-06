@@ -448,6 +448,9 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
     fResizeHandle = makeSubwidget<ResizeHandle>(this, palette);
     fResizeHandle->setSize(20, 20);
+    fResizeHandle->RequestToResizeCallback = [this](DGL::Size<uint> newSize) {
+        setSize(newSize);
+    };
 
     uiReshape(getWidth(), getHeight());
 }
