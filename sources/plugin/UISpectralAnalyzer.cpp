@@ -41,6 +41,7 @@
 #include "Window.hpp"
 #include "Color.hpp"
 #include <sys/stat.h>
+#include <cmath>
 
 enum {
     kToolBarIdSetup = 1,
@@ -200,7 +201,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fAttackTimeSlider->ValueChangedCallback = [this](double value)
             { setParameterValue(kPidAttackTime, value); };
         fAttackTimeSlider->FormatCallback = [](double value) -> std::string
-            { return std::to_string((int)(value * 1e3)) + " ms"; };
+            { return std::to_string(std::lround(value * 1e3)) + " ms"; };
         fSetupWindow->moveAlong(fAttackTimeSlider);
 
         y += 30;
@@ -220,7 +221,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         fReleaseTimeSlider->ValueChangedCallback = [this](double value)
             { setParameterValue(kPidReleaseTime, value); };
         fReleaseTimeSlider->FormatCallback = [](double value) -> std::string
-            { return std::to_string((int)(value * 1e3)) + " ms"; };
+            { return std::to_string(std::lround(value * 1e3)) + " ms"; };
         fSetupWindow->moveAlong(fReleaseTimeSlider);
     }
 
