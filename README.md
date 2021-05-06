@@ -15,6 +15,9 @@ Spectacle is a real-time spectral analyzer using the short-time Fourier transfor
 
 ## Controls
 
+- **algorithm**
+  - _STFT_: sliding discrete Fourier transform
+  - _STFT xN_: multi-rate STFT, providing a more precise lower spectrum for smaller resolutions
 - **resolution**: number of frequency points evaluated by STFT, greater CPU load in high values
 - **step**: linked to the rate of STFT updates, faster when low but also more CPU consuming
 - **attack time**: reaction delay to rapid increases of amplitude
