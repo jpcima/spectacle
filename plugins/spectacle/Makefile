@@ -51,7 +51,7 @@ NAME = spectacle-analyzer
 # Plugin types to build
 
 BUILD_LV2 ?= true
-BUILD_VST2 ?= false
+BUILD_VST2 ?= true
 BUILD_JACK ?= true
 BUILD_DSSI ?= false
 BUILD_LADSPA ?= false
