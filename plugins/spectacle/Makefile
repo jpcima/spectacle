@@ -66,7 +66,8 @@ FILES_DSP = \
 	sources/dsp/SpectralAnalyzer.cpp \
 	sources/dsp/STFT.cpp \
 	sources/dsp/MultirateSTFT.cpp \
-	thirdparty/spin_mutex/src/SpinMutex.cpp
+	thirdparty/spin_mutex/src/SpinMutex.cpp \
+	thirdparty/rt_semaphore/src/RTSemaphore.cpp
 
 FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \
@@ -95,7 +96,7 @@ UI_TYPE = opengl
 include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
-BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/hiir-1.33 -Ithirdparty/spin_mutex/src
+BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/hiir-1.33 -Ithirdparty/spin_mutex/src -Ithirdparty/rt_semaphore/src
 LINK_FLAGS += -lfftw3f
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
@@ -103,6 +104,10 @@ BUILD_CXX_FLAGS += -DUSE_IMPATIENT_FFT_PLANNING=1
 endif
 ifeq ($(SKIP_FFT_PRECACHING),1)
 BUILD_CXX_FLAGS += -DSKIP_FFT_PRECACHING=1
+endif
+
+ifeq ($(LINUX),true)
+BUILD_CXX_FLAGS += -pthread
 endif
 
 # --------------------------------------------------------------
