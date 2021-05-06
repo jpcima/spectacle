@@ -34,8 +34,24 @@ static constexpr double C16x[2] = {
 	0.107172166664564611,
 	0.530904350331903085,
 };
+// 32x <-> 16x: TBW = 0.469375
+static constexpr double C32x[2] = {
+	0.105969237763476387,
+	0.528620279623742473,
+};
+// 64x <-> 32x: TBW = 0.484687
+static constexpr double C64x[1] = {
+	0.333526281707771211,
+};
+// 128x <-> 64x: TBW = 0.492344
+static constexpr double C128x[1] = {
+	0.333381553051105561,
+};
 
 static constexpr uint32_t NC2x = sizeof(C2x) / sizeof(double);
 static constexpr uint32_t NC4x = sizeof(C4x) / sizeof(double);
 static constexpr uint32_t NC8x = sizeof(C8x) / sizeof(double);
 static constexpr uint32_t NC16x = sizeof(C16x) / sizeof(double);
+static constexpr uint32_t NC32x = sizeof(C32x) / sizeof(double);
+static constexpr uint32_t NC64x = sizeof(C64x) / sizeof(double);
+static constexpr uint32_t NC128x = sizeof(C128x) / sizeof(double);
