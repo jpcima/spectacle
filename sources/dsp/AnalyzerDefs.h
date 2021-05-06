@@ -7,10 +7,13 @@ enum Algorithm {
     kAlgoMultirateStftX3,
     kAlgoMultirateStftX4,
     kAlgoMultirateStftX5,
+    kAlgoMultirateStftX6,
+    kAlgoMultirateStftX7,
+    kAlgoMultirateStftX8,
     kNumAlgorithms,
 };
 
-static constexpr Algorithm kDefaultAlgorithm = kAlgoMultirateStftX4;
+static constexpr Algorithm kDefaultAlgorithm = kAlgoMultirateStftX6;
 
 inline const char *getAlgorithmName(Algorithm a)
 {
@@ -25,12 +28,18 @@ inline const char *getAlgorithmName(Algorithm a)
         return "STFT x4";
     case kAlgoMultirateStftX5:
         return "STFT x5";
+    case kAlgoMultirateStftX6:
+        return "STFT x6";
+    case kAlgoMultirateStftX7:
+        return "STFT x7";
+    case kAlgoMultirateStftX8:
+        return "STFT x8";
     }
 }
 
-static constexpr uint32_t kStftMinSizeLog2 = 8;
+static constexpr uint32_t kStftMinSizeLog2 = 6;
 static constexpr uint32_t kStftMaxSizeLog2 = 14;
-static constexpr uint32_t kStftDefaultSizeLog2 = 10;
+static constexpr uint32_t kStftDefaultSizeLog2 = 8;
 
 static constexpr uint32_t kStftNumSizes = 1 + kStftMaxSizeLog2 - kStftMinSizeLog2;
 

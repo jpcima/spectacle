@@ -163,3 +163,6 @@ template class MultirateSTFT<2>;
 template class MultirateSTFT<3>;
 template class MultirateSTFT<4>;
 template class MultirateSTFT<5>;
+template class MultirateSTFT<6>;
+template class MultirateSTFT<7>;
+template class MultirateSTFT<8>;

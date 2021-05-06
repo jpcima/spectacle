@@ -178,6 +178,15 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
             case kAlgoMultirateStftX5:
                 stft = new MultirateSTFT<5>;
                 break;
+            case kAlgoMultirateStftX6:
+                stft = new MultirateSTFT<6>;
+                break;
+            case kAlgoMultirateStftX7:
+                stft = new MultirateSTFT<7>;
+                break;
+            case kAlgoMultirateStftX8:
+                stft = new MultirateSTFT<8>;
+                break;
             }
             fStft[c].reset(stft);
             stft->configure(config);
