@@ -100,6 +100,9 @@ LINK_FLAGS += -lfftw3f
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
 BUILD_CXX_FLAGS += -DUSE_IMPATIENT_FFT_PLANNING=1
 endif
+ifeq ($(SKIP_FFT_PRECACHING),1)
+BUILD_CXX_FLAGS += -DSKIP_FFT_PRECACHING=1
+endif
 
 # --------------------------------------------------------------
 # Resources

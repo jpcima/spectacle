@@ -29,6 +29,7 @@
 #include "dsp/STFT.h"
 #include "dsp/MultirateSTFT.h"
 #include "dsp/AnalyzerDefs.h"
+#include "dsp/FFTPlanner.h"
 #include "blink/DenormalDisabler.h"
 #include <memory>
 #include <cstring>
@@ -143,6 +144,14 @@ void PluginSpectralAnalyzer::loadProgram(uint32_t index)
 
 void PluginSpectralAnalyzer::activate()
 {
+#if !defined(SKIP_FFT_PRECACHING)
+    // precache FFT plans for quicker use
+    for (uint32_t sizeLog2 = kStftMinSizeLog2; sizeLog2 <= kStftMaxSizeLog2; ++sizeLog2) {
+        uint32_t size = 1u << sizeLog2;
+        FFTPlanner::getInstance().forwardFFT(size);
+    }
+#endif
+
     fMustReconfigureStft = true;
 }
 

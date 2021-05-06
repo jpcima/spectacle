@@ -5,3 +5,8 @@
 #     Define to 1 for fast, non-optimized FFT planning.
 #     Accelerates the build-run cycle when enabled.
 USE_IMPATIENT_FFT_PLANNING = 0
+
+# Option: SKIP_FFT_PRECACHING
+#     Define to 1 to skip FFT precaching at startup.
+#     Accelerates the build-run cycle when enabled.
+SKIP_FFT_PRECACHING = 0
