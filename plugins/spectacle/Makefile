@@ -65,7 +65,8 @@ FILES_DSP = \
 	sources/dsp/FFTPlanner.cpp \
 	sources/dsp/SpectralAnalyzer.cpp \
 	sources/dsp/STFT.cpp \
-	sources/dsp/MultirateSTFT.cpp
+	sources/dsp/MultirateSTFT.cpp \
+	thirdparty/spin_mutex/src/SpinMutex.cpp
 
 FILES_UI = \
 	sources/plugin/UISpectralAnalyzer.cpp \
@@ -94,7 +95,7 @@ UI_TYPE = opengl
 include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
-BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/hiir-1.33
+BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/hiir-1.33 -Ithirdparty/spin_mutex/src
 LINK_FLAGS += -lfftw3f
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)

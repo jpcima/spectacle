@@ -753,7 +753,7 @@ void UISpectralAnalyzer::updateSpectrum()
     PluginSpectralAnalyzer *plugin = getPluginInstance();
     DISTRHO_SAFE_ASSERT_RETURN(plugin, );
 
-    std::unique_lock<std::mutex> lock(plugin->fSendMutex);
+    std::unique_lock<SpinMutex> lock(plugin->fSendMutex);
     fFrequencies = plugin->fSendFrequencies;
     fMagnitudes = plugin->fSendMagnitudes;
     fSize = plugin->fSendSize;

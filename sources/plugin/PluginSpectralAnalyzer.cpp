@@ -209,7 +209,7 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
         stft.process(input, frames);
     }
 
-    std::unique_lock<std::mutex> sendLock(fSendMutex, std::try_to_lock);
+    std::unique_lock<SpinMutex> sendLock(fSendMutex, std::try_to_lock);
     if (sendLock.owns_lock()) {
         uint32_t numBins;
         const float* freqs[kNumChannels] = {};

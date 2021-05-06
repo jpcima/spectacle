@@ -27,6 +27,7 @@
 #pragma once
 #include "DistrhoPlugin.hpp"
 #include "dsp/SpectralAnalyzer.h"
+#include <SpinMutex.h>
 #include <mutex>
 #include <memory>
 
@@ -107,7 +108,7 @@ protected:
     // -------------------------------------------------------------------
 
 public:
-    std::mutex fSendMutex;
+    SpinMutex fSendMutex;
     uint32_t fSendSize = 0;
     std::vector<float> fSendFrequencies;
     std::vector<float> fSendMagnitudes;
