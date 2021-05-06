@@ -119,7 +119,7 @@ private:
 
     enum { kNumChannels = DISTRHO_PLUGIN_NUM_INPUTS };
 
-    std::unique_ptr<SteppingAnalyzer> fStft[kNumChannels];
+    std::unique_ptr<BasicAnalyzer> fStft[kNumChannels];
     bool fMustReconfigureStft = false;
 
     const std::unique_ptr<float[]> fParameters;
