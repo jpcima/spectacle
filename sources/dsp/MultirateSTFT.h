@@ -16,8 +16,8 @@ private:
     void processOutputBins();
 
 private:
-    enum { Log2Factor = Rates-1 };
-    enum { Factor = 1u << Log2Factor};
+    static constexpr uint32_t Log2Factor = Rates - 1;
+    static constexpr uint32_t Factor = 1u << Log2Factor;
 
     STFT fStft[Rates];
     Downsampler<Log2Factor> fDownsampler;
@@ -28,6 +28,6 @@ private:
     uint32_t fNumRemainder = 0;
     float fRemainder[Factor] = {};
 
-    enum { TempSamples = 1024u };
+    static constexpr uint32_t TempSamples = 1024u;
     float fTemp[TempSamples];
 };

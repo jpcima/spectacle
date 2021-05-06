@@ -154,6 +154,11 @@ void MultirateSTFT<Rates>::processOutputBins()
 }
 
 ///
+template <uint32_t Rates> constexpr uint32_t MultirateSTFT<Rates>::Log2Factor;
+template <uint32_t Rates> constexpr uint32_t MultirateSTFT<Rates>::Factor;
+template <uint32_t Rates> constexpr uint32_t MultirateSTFT<Rates>::TempSamples;
+
+///
 template class MultirateSTFT<2>;
 template class MultirateSTFT<3>;
 template class MultirateSTFT<4>;
