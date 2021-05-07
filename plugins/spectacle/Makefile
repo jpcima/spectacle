@@ -97,7 +97,13 @@ include ../../dpf/Makefile.plugins.mk
 
 BUILD_CXX_FLAGS += -Isources -Imeta -I$(BUILD_DIR)/res
 BUILD_CXX_FLAGS += -Ithirdparty/blink -Ithirdparty/spline -Ithirdparty/stb -Ithirdparty/simpleini -Ithirdparty/hiir-1.33 -Ithirdparty/spin_mutex/src -Ithirdparty/rt_semaphore/src
-LINK_FLAGS += -lfftw3f
+
+FFTW_CFLAGS = $(shell $(PKG_CONFIG) --cflags fftw3f)
+FFTW_LIBS   = $(shell $(PKG_CONFIG) --libs fftw3f)
+
+BUILD_C_FLAGS += $(FFTW_CFLAGS)
+BUILD_CXX_FLAGS += $(FFTW_CFLAGS)
+LINK_FLAGS += $(FFTW_LIBS)
 
 ifeq ($(USE_IMPATIENT_FFT_PLANNING),1)
 BUILD_CXX_FLAGS += -DUSE_IMPATIENT_FFT_PLANNING=1
@@ -109,6 +115,10 @@ endif
 ifeq ($(LINUX),true)
 BUILD_CXX_FLAGS += -pthread
 endif
+
+# want the asprintf functions
+BUILD_C_FLAGS += -D_GNU_SOURCE=1
+BUILD_CXX_FLAGS += -D_GNU_SOURCE=1
 
 # --------------------------------------------------------------
 # Resources

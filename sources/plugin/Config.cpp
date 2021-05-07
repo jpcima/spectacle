@@ -30,7 +30,8 @@ const std::string &get_configuration_dir()
 {
 #if defined(_WIN32)
     #pragma message("TODO: not implemented")
-    return std::string();
+    static const std::string empty;
+    return empty;
 #else
     static const std::string path = []() -> std::string {
         std::string path;

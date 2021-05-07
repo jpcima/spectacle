@@ -143,7 +143,11 @@ private:
 
     std::unique_ptr<CSimpleIniA> fUiConfig;
     std::string fCurrentTheme = "default";
+#if !defined(_WIN32)
     timespec fCurrentThemeMtime {};
+#else
+    int64_t fCurrentThemeMtime {};
+#endif
     bool fThemeEditMode = false;
 
 private:

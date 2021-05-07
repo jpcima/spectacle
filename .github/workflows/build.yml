@@ -1,0 +1,123 @@
+name: build
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build_for_linux:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Set up dependencies
+      run: |
+        sudo apt-get update && \
+        sudo apt-get install \
+          build-essential \
+          libfftw3-dev \
+          libjack-jackd2-dev \
+          libgl-dev \
+          libx11-dev
+    - name: Build all
+      shell: bash
+      run: make -j $(nproc)
+
+  build_for_win32:
+    runs-on: ubuntu-18.04
+    container:
+      image: archlinux
+    steps:
+    - name: Configure pacman repositories
+      shell: bash
+      run: |
+        cat >>/etc/pacman.conf <<EOF
+        [multilib]
+        Include = /etc/pacman.d/mirrorlist
+        [mingw-w64]
+        SigLevel = Optional TrustAll
+        Server = https://github.com/jpcima/arch-mingw-w64/releases/download/repo.\$arch/
+        EOF
+    - name: Set up dependencies
+      shell: bash
+      run: |
+        pacman -Sqyu --noconfirm
+        pacman -Sq --needed --noconfirm \
+          base-devel \
+          git \
+          wine \
+          mingw-w64-gcc \
+          mingw-w64-pkg-config \
+          mingw-w64-fftw
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Build
+      shell: bash
+      run: |
+        export AR=i686-w64-mingw32-ar
+        export RANLIB=i686-w64-mingw32-ranlib
+        export CC=i686-w64-mingw32-gcc
+        export CXX=i686-w64-mingw32-g++
+        export STRIP=i686-w64-mingw32-strip
+        export WINDRES=i686-w64-mingw32-windres
+        export PKG_CONFIG=i686-w64-mingw32-pkg-config
+
+        export PKG_CONFIG="$PKG_CONFIG --static"
+
+        export WINEPREFIX=~/my-wine-prefix
+        mkdir -p "$WINEPREFIX"
+
+        CROSS_COMPILING=true EXE_WRAPPER=wine WINDOWS=true make -j $(nproc)
+
+  build_for_win64:
+    runs-on: ubuntu-18.04
+    container:
+      image: archlinux
+    steps:
+    - name: Configure pacman repositories
+      shell: bash
+      run: |
+        cat >>/etc/pacman.conf <<EOF
+        [multilib]
+        Include = /etc/pacman.d/mirrorlist
+        [mingw-w64]
+        SigLevel = Optional TrustAll
+        Server = https://github.com/jpcima/arch-mingw-w64/releases/download/repo.\$arch/
+        EOF
+    - name: Set up dependencies
+      shell: bash
+      run: |
+        pacman -Sqyu --noconfirm
+        pacman -Sq --needed --noconfirm \
+          base-devel \
+          git \
+          wine \
+          mingw-w64-gcc \
+          mingw-w64-pkg-config \
+          mingw-w64-fftw
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Build
+      shell: bash
+      run: |
+        export AR=x86_64-w64-mingw32-ar
+        export RANLIB=x86_64-w64-mingw32-ranlib
+        export CC=x86_64-w64-mingw32-gcc
+        export CXX=x86_64-w64-mingw32-g++
+        export STRIP=x86_64-w64-mingw32-strip
+        export WINDRES=x86_64-w64-mingw32-windres
+        export PKG_CONFIG=x86_64-w64-mingw32-pkg-config
+
+        export PKG_CONFIG="$PKG_CONFIG --static"
+
+        export WINEPREFIX=~/my-wine-prefix
+        mkdir -p "$WINEPREFIX"
+
+        CROSS_COMPILING=true EXE_WRAPPER=wine WINDOWS=true make -j $(nproc)

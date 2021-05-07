@@ -5,6 +5,9 @@
 #include "Window.hpp"
 #include <algorithm>
 #include <cassert>
+#if defined(_WIN32)
+#undef near
+#endif
 
 ///
 static double mtof(double m)

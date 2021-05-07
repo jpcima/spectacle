@@ -532,8 +532,12 @@ void UISpectralAnalyzer::uiIdle()
 
         struct stat st;
         if (::stat(path.c_str(), &st) == 0) {
+#if !defined(_WIN32)
             update = fCurrentThemeMtime.tv_sec != st.st_mtim.tv_sec ||
                 fCurrentThemeMtime.tv_nsec != st.st_mtim.tv_nsec;
+#else
+            update = fCurrentThemeMtime != st.st_mtime;
+#endif
         }
 
         if (update)
@@ -811,7 +815,7 @@ void UISpectralAnalyzer::loadTheme(const char *theme)
             ini.reset();
     }
 
-    fCurrentThemeMtime = timespec{};
+    fCurrentThemeMtime = {};
 
     if (!ini)
         fprintf(stderr, "Cannot load theme: %s\n", theme);
@@ -819,8 +823,13 @@ void UISpectralAnalyzer::loadTheme(const char *theme)
         palette.load(*ini, "color");
 
         struct stat st;
-        if (::stat(path.c_str(), &st) == 0)
+        if (::stat(path.c_str(), &st) == 0) {
+#if !defined(_WIN32)
             fCurrentThemeMtime = st.st_mtim;
+#else
+            fCurrentThemeMtime = st.st_mtime;
+#endif
+        }
     }
 
     ///
