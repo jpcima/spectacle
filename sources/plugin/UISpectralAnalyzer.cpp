@@ -708,6 +708,7 @@ void UISpectralAnalyzer::switchMode(int mode)
         break;
     case kModeHide:
         fMainToolBar->setVisible(true);
+        fResizeHandle->setVisible(true);
         break;
     }
 
@@ -732,6 +733,7 @@ void UISpectralAnalyzer::switchMode(int mode)
         break;
     case kModeHide:
         fMainToolBar->setVisible(false);
+        fResizeHandle->setVisible(false);
         break;
     case kModeColor:
         fColorWindow->setAllVisible(true);
