@@ -23,6 +23,11 @@ Spectacle is a real-time spectral analyzer using the short-time Fourier transfor
 - **attack time**: reaction delay to rapid increases of amplitude
 - **release time**: reaction delay to rapid decreases of amplitude
 
+## Compatibility notes
+
+Some hosts on Linux, including Carla (as of 2.3.0), are unable to turn off the DSP when the editor is closed.
+The LV2 version is recommended in this case.
+
 ## Change log
 
 **1.0**
