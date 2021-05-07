@@ -144,6 +144,8 @@ void PluginSpectralAnalyzer::loadProgram(uint32_t index)
 
 void PluginSpectralAnalyzer::activate()
 {
+    fComputationStarts = true;
+
 #if !defined(SKIP_FFT_PRECACHING)
     // precache FFT plans for quicker use
     for (uint32_t sizeLog2 = kStftMinSizeLog2; sizeLog2 <= kStftMaxSizeLog2; ++sizeLog2) {
@@ -159,41 +161,59 @@ void PluginSpectralAnalyzer::run(const float **inputs, float **outputs, uint32_t
 {
     WebCore::DenormalDisabler dd;
 
-    std::unique_lock<SpinMutex> stftLock(fStftMutex, std::try_to_lock);
+    bool computationShouldBeActive = fEditorVisible;
 
-    if (stftLock.owns_lock()) {
-        if (fMustReconfigureEnvelope.exchange(false)) {
-            for (uint32_t c = 0; c < kNumChannels; ++c)
-                fStft[c]->setAttackAndRelease(fParameters[kPidAttackTime], fParameters[kPidReleaseTime]);
-        }
+    if (fComputationIsActive != computationShouldBeActive) {
+        fComputationIsActive = computationShouldBeActive;
+        if (computationShouldBeActive)
+            fComputationStarts = true;
+    }
 
-        for (uint32_t c = 0; c < kNumChannels; ++c) {
-            BasicAnalyzer &stft = *fStft[c];
-            const float *input = inputs[c];
-            stft.process(input, frames);
-        }
+    if (computationShouldBeActive) {
+        std::unique_lock<SpinMutex> stftLock(fStftMutex, std::try_to_lock);
 
-        std::unique_lock<SpinMutex> sendLock(fSendMutex, std::try_to_lock);
-        if (sendLock.owns_lock()) {
-            uint32_t numBins;
-            const float* freqs[kNumChannels] = {};
-            const float* mags[kNumChannels] = {};
+        if (stftLock.owns_lock()) {
+            if (fComputationStarts) {
+                for (uint32_t c = 0; c < kNumChannels; ++c) {
+                    BasicAnalyzer &stft = *fStft[c];
+                    stft.clear();
+                }
+                fComputationStarts = false;
+            }
 
-            numBins = fStft[0]->getNumBins();
-            for (uint32_t c = 0; c < kNumChannels; ++c) {
-                BasicAnalyzer &stft = *fStft[c];
-                freqs[c] = stft.getFrequencies();
-                mags[c] = stft.getMagnitudes();
+            if (fMustReconfigureEnvelope.exchange(false)) {
+                for (uint32_t c = 0; c < kNumChannels; ++c)
+                    fStft[c]->setAttackAndRelease(fParameters[kPidAttackTime], fParameters[kPidReleaseTime]);
             }
 
             for (uint32_t c = 0; c < kNumChannels; ++c) {
-                fSendSize = numBins;
-                std::memcpy(
-                    &fSendFrequencies[c * numBins], freqs[c],
-                    numBins * sizeof(float));
-                std::memcpy(
-                    &fSendMagnitudes[c * numBins], mags[c],
-                    numBins * sizeof(float));
+                BasicAnalyzer &stft = *fStft[c];
+                const float *input = inputs[c];
+                stft.process(input, frames);
+            }
+
+            std::unique_lock<SpinMutex> sendLock(fSendMutex, std::try_to_lock);
+            if (sendLock.owns_lock()) {
+                uint32_t numBins;
+                const float* freqs[kNumChannels] = {};
+                const float* mags[kNumChannels] = {};
+
+                numBins = fStft[0]->getNumBins();
+                for (uint32_t c = 0; c < kNumChannels; ++c) {
+                    BasicAnalyzer &stft = *fStft[c];
+                    freqs[c] = stft.getFrequencies();
+                    mags[c] = stft.getMagnitudes();
+                }
+
+                for (uint32_t c = 0; c < kNumChannels; ++c) {
+                    fSendSize = numBins;
+                    std::memcpy(
+                        &fSendFrequencies[c * numBins], freqs[c],
+                        numBins * sizeof(float));
+                    std::memcpy(
+                        &fSendMagnitudes[c * numBins], mags[c],
+                        numBins * sizeof(float));
+                }
             }
         }
     }

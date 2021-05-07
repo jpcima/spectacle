@@ -458,6 +458,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
 
 UISpectralAnalyzer::~UISpectralAnalyzer()
 {
+    getPluginInstance()->setEditorIsVisible(false);
 }
 
 PluginSpectralAnalyzer *UISpectralAnalyzer::getPluginInstance()
@@ -520,6 +521,8 @@ void UISpectralAnalyzer::sampleRateChanged(double newSampleRate)
 */
 void UISpectralAnalyzer::uiIdle()
 {
+    getPluginInstance()->setEditorIsVisible(isVisible());
+
     updateSpectrum();
 
     // under theme developer mode, recheck periodically for edits

@@ -39,6 +39,11 @@ public:
     PluginSpectralAnalyzer();
     ~PluginSpectralAnalyzer();
 
+    // -------------------------------------------------------------------
+
+    // Called by editor to indicate visibility status
+    void setEditorIsVisible(bool editorVisible) { fEditorVisible = editorVisible; }
+
 protected:
     // -------------------------------------------------------------------
     // Information
@@ -139,6 +144,10 @@ private:
     std::thread fThread;
     RTSemaphore fThreadSem;
     volatile bool fThreadQuit = false;
+
+    bool fComputationIsActive = false;
+    bool fComputationStarts = false;
+    volatile bool fEditorVisible = false; // written by editor
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginSpectralAnalyzer)
 };
