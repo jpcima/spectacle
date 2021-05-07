@@ -25,7 +25,7 @@ Spectacle is a real-time spectral analyzer using the short-time Fourier transfor
 
 ## Compatibility notes
 
-Some hosts on Linux, including Carla (as of 2.3.0), are unable to turn off the DSP when the editor is closed.
+Some hosts on Linux, including Carla (as of 2.3.0), are unable to turn off the DSP when the VST editor is closed.
 The LV2 version is recommended in this case.
 
 ## Change log
