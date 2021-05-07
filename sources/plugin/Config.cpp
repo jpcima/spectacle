@@ -46,10 +46,19 @@ const std::string &get_configuration_dir()
         path.append(DISTRHO_PLUGIN_NAME "/");
         mkdir(path.c_str(), 0755);
 #else
-        path = get_home_directory();
-        if (path.empty())
-            return std::string();
-        path.append(".config/");
+        if (const char *env = std::getenv("XDG_CONFIG_HOME")) {
+            if (env[0] == '/') {
+                path = env;
+                if (path.back() != '/')
+                    path.push_back('/');
+            }
+        }
+        if (path.empty()) {
+            path = get_home_directory();
+            if (path.empty())
+                return std::string();
+            path.append(".config/");
+        }
         mkdir(path.c_str(), 0755);
         path.append(DISTRHO_PLUGIN_NAME "/");
         mkdir(path.c_str(), 0755);
