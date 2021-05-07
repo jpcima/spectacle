@@ -205,7 +205,7 @@ jobs:
       ##       see https://github.com/actions/create-release/issues/29
       - uses: softprops/action-gh-release@v1
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.TOKEN}}
         with:
           tag_name: ${{env.install_ref}}
           name: Release ${{env.install_ref}}
