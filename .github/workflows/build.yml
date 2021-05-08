@@ -79,6 +79,7 @@ jobs:
 
         export PKG_CONFIG="$PKG_CONFIG --static"
 
+        export WINEDEBUG=-all
         export WINEPREFIX=~/my-wine-prefix
         mkdir -p "$WINEPREFIX"
 
@@ -140,6 +141,7 @@ jobs:
 
         export PKG_CONFIG="$PKG_CONFIG --static"
 
+        export WINEDEBUG=-all
         export WINEPREFIX=~/my-wine-prefix
         mkdir -p "$WINEPREFIX"
 
