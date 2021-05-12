@@ -30,6 +30,16 @@ The LV2 version is recommended in this case.
 
 ## Change log
 
+**2.0**
+- added accelerated OpenGL graphics
+- improved the default color scheme for readability
+- added multi-rate algorithms, to increase resolution in the low frequency range
+- adopted a more musically-relevant grid scale, and drawn minor grid lines
+- added support of custom palettes in manually written theme files
+- added a resizing handle
+- eliminated the requirement of `xxd` for building
+- renamed the standalone to avoid a conflict with existing programs
+
 **1.0**
 
 - initial release
