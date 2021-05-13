@@ -177,25 +177,29 @@ ifeq ($(BUILD_DSSI),true)
 ifneq ($(MACOS_OR_WINDOWS),true)
 ifeq ($(HAVE_DGL),true)
 ifeq ($(HAVE_LIBLO),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)-dssi$(LIB_EXT) $(DESTDIR)$(DSSI_DIR)/$(NAME)-dssi$(LIB_EXT)
+	@mkdir -p -m 755 $(DESTDIR)$(DSSI_DIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)-dssi$(LIB_EXT) $(DESTDIR)$(DSSI_DIR)/$(NAME)-dssi$(LIB_EXT)
 endif
 endif
 endif
 endif
 ifeq ($(BUILD_LADSPA),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)-ladspa$(LIB_EXT) $(DESTDIR)$(LADSPA_DIR)/$(NAME)-ladspa$(LIB_EXT)
+	@mkdir -p -m 755 $(DESTDIR)$(LADSPA_DIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)-ladspa$(LIB_EXT) $(DESTDIR)$(LADSPA_DIR)/$(NAME)-ladspa$(LIB_EXT)
 endif
 ifeq ($(BUILD_VST2),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)-vst$(LIB_EXT) $(DESTDIR)$(VST_DIR)/$(NAME)-vst$(LIB_EXT)
+	@mkdir -p -m 755 $(DESTDIR)$(VST_DIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)-vst$(LIB_EXT) $(DESTDIR)$(VST_DIR)/$(NAME)-vst$(LIB_EXT)
 endif
 ifeq ($(BUILD_LV2),true)
-	@install -dm755 $(DESTDIR)$(LV2_DIR)/$(NAME).lv2 && \
-		install -m644 $(TARGET_DIR)/$(NAME).lv2/*.ttl $(DESTDIR)$(LV2_DIR)/$(NAME).lv2 && \
-		install -m755 $(TARGET_DIR)/$(NAME).lv2/*$(LIB_EXT) $(DESTDIR)$(LV2_DIR)/$(NAME).lv2
+	@mkdir -p -m 755 $(DESTDIR)$(LV2_DIR)/$(NAME).lv2
+	@install -m 644 $(TARGET_DIR)/$(NAME).lv2/*.ttl $(DESTDIR)$(LV2_DIR)/$(NAME).lv2
+	@install -m 755 $(TARGET_DIR)/$(NAME).lv2/*$(LIB_EXT) $(DESTDIR)$(LV2_DIR)/$(NAME).lv2
 endif
 ifeq ($(BUILD_JACK),true)
 ifeq ($(HAVE_JACK),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)$(APP_EXT) $(DESTDIR)$(BINDIR)/$(NAME)$(APP_EXT)
+	@mkdir -p -m 755 $(DESTDIR)$(BINDIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)$(APP_EXT) $(DESTDIR)$(BINDIR)/$(NAME)$(APP_EXT)
 endif
 endif
 
@@ -204,25 +208,29 @@ ifeq ($(BUILD_DSSI),true)
 ifneq ($(MACOS_OR_WINDOWS),true)
 ifeq ($(HAVE_DGL),true)
 ifeq ($(HAVE_LIBLO),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)-dssi$(LIB_EXT) $(USER_DSSI_DIR)/$(NAME)-dssi$(LIB_EXT)
+	@mkdir -p -m 755 $(USER_DSSI_DIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)-dssi$(LIB_EXT) $(USER_DSSI_DIR)/$(NAME)-dssi$(LIB_EXT)
 endif
 endif
 endif
 endif
 ifeq ($(BUILD_LADSPA),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)-ladspa$(LIB_EXT) $(USER_LADSPA_DIR)/$(NAME)-ladspa$(LIB_EXT)
+	@mkdir -p -m 755 $(USER_LADSPA_DIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)-ladspa$(LIB_EXT) $(USER_LADSPA_DIR)/$(NAME)-ladspa$(LIB_EXT)
 endif
 ifeq ($(BUILD_VST2),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)-vst$(LIB_EXT) $(USER_VST_DIR)/$(NAME)-vst$(LIB_EXT)
+	@mkdir -p -m 755 $(USER_VST_DIR)
+	@install -m 755 $(TARGET_DIR)/$(NAME)-vst$(LIB_EXT) $(USER_VST_DIR)/$(NAME)-vst$(LIB_EXT)
 endif
 ifeq ($(BUILD_LV2),true)
-	@install -dm755 $(USER_LV2_DIR)/$(NAME).lv2 && \
-		install -m644 $(TARGET_DIR)/$(NAME).lv2/*.ttl $(USER_LV2_DIR)/$(NAME).lv2 && \
-		install -m755 $(TARGET_DIR)/$(NAME).lv2/*$(LIB_EXT) $(USER_LV2_DIR)/$(NAME).lv2
+	@mkdir -p -m 755 $(USER_LV2_DIR)/$(NAME).lv2
+	@install -m 644 $(TARGET_DIR)/$(NAME).lv2/*.ttl $(USER_LV2_DIR)/$(NAME).lv2
+	@install -m 755 $(TARGET_DIR)/$(NAME).lv2/*$(LIB_EXT) $(USER_LV2_DIR)/$(NAME).lv2
 endif
 ifeq ($(BUILD_JACK),true)
 ifeq ($(HAVE_JACK),true)
-	@install -Dm755 $(TARGET_DIR)/$(NAME)$(APP_EXT) $(HOME)/bin/$(NAME)$(APP_EXT)
+	@mkdir -p -m 755 $(HOME)/bin
+	@install -m 755 $(TARGET_DIR)/$(NAME)$(APP_EXT) $(HOME)/bin/$(NAME)$(APP_EXT)
 endif
 endif
 
