@@ -12,6 +12,7 @@
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
 LIBDIR ?= $(PREFIX)/lib
+DATADIR ?= $(PREFIX)/share
 DSSI_DIR ?= $(LIBDIR)/dssi
 LADSPA_DIR ?= $(LIBDIR)/ladspa
 ifneq ($(MACOS_OR_WINDOWS),true)
@@ -200,6 +201,8 @@ ifeq ($(BUILD_JACK),true)
 ifeq ($(HAVE_JACK),true)
 	@mkdir -p -m 755 $(DESTDIR)$(BINDIR)
 	@install -m 755 $(TARGET_DIR)/$(NAME)$(APP_EXT) $(DESTDIR)$(BINDIR)/$(NAME)$(APP_EXT)
+	@mkdir -p -m 755 $(DESTDIR)$(DATADIR)/applications
+	@install -m 644 ../../resources/desktop/$(NAME).desktop $(DESTDIR)$(DATADIR)/applications/$(NAME).desktop
 endif
 endif
 

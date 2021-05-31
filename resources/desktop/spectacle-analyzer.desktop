@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Spectacle
+Comment=Realtime graphical spectrum analyzer
+Comment[fr]=Analyseur graphique de spectre en temps réel
+Exec=spectacle-analyzer
+Icon=spectacle-analyzer
+Terminal=false
+Type=Application
+Categories=Audio;AudioVideo;
