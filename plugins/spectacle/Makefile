@@ -203,6 +203,8 @@ ifeq ($(HAVE_JACK),true)
 	@install -m 755 $(TARGET_DIR)/$(NAME)$(APP_EXT) $(DESTDIR)$(BINDIR)/$(NAME)$(APP_EXT)
 	@mkdir -p -m 755 $(DESTDIR)$(DATADIR)/applications
 	@install -m 644 ../../resources/desktop/$(NAME).desktop $(DESTDIR)$(DATADIR)/applications/$(NAME).desktop
+	@mkdir -p -m 755 $(DESTDIR)$(DATADIR)/pixmaps
+	@install -m 644 ../../resources/desktop/$(NAME).png $(DESTDIR)$(DATADIR)/pixmaps/$(NAME).png
 endif
 endif
 
