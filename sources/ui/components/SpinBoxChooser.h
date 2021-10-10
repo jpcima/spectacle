@@ -6,7 +6,7 @@
 #include <functional>
 class ColorPalette;
 
-class SpinBoxChooser : public NanoWidget {
+class SpinBoxChooser : public NanoSubWidget {
 public:
     SpinBoxChooser(Widget *group, const ColorPalette &palette);
     void clearChoices();

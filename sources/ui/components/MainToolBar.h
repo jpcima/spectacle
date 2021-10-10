@@ -6,7 +6,7 @@
 #include <memory>
 class ColorPalette;
 
-class MainToolBar : public NanoWidget {
+class MainToolBar : public NanoSubWidget {
 public:
     MainToolBar(Widget *group, ColorPalette &palette);
     void addButton(int id, const char *label, const char *icon);

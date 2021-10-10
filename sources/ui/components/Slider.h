@@ -4,7 +4,7 @@
 #include <functional>
 class ColorPalette;
 
-class Slider : public NanoWidget {
+class Slider : public NanoSubWidget {
 public:
     Slider(Widget *group, const ColorPalette &palette);
 

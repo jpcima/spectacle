@@ -6,7 +6,7 @@
 #include <memory>
 class ColorPalette;
 
-class SpectrumView : public NanoWidget {
+class SpectrumView : public NanoSubWidget {
 public:
     SpectrumView(Widget *parent, const ColorPalette &palette);
 

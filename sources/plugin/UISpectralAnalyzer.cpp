@@ -567,7 +567,8 @@ void UISpectralAnalyzer::uiReshape(uint width, uint height)
     }
 
     for (FloatingWindow *win : floats) {
-        win->setMoveLimits(getAbsolutePos(), getSize());
+        DGL::Point<int> origin{};
+        win->setMoveLimits(origin, getSize());
         // TODO(jpc) I'd rather move the window relative to nearest corner
         win->repositionWithinLimits();
     }
@@ -584,11 +585,13 @@ void UISpectralAnalyzer::onNanoDisplay()
 
 bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
 {
+    DGL::Point<int> mpos{int(ev.pos.getX() + 0.5), int(ev.pos.getY() + 0.5)};
+
     if (fMode == kModeScale && ev.press && ev.button == 1) {
         fSelectionRectangle->setVisible(true);
-        fSelectionRectangle->setAbsolutePos(ev.pos);
+        fSelectionRectangle->setAbsolutePos(mpos);
         fSelectionRectangle->setSize(0, 0);
-        fSelectionOrigin = ::Point(ev.pos.getX(), ev.pos.getY());
+        fSelectionOrigin = ::Point(mpos.getX(), mpos.getY());
         fScaleRectDragging = true;
         return true;
     }
@@ -620,7 +623,7 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
     else if (fMode == kModeSelect && ev.press && ev.button == 1) {
         fSelectPositionFixed = !fSelectPositionFixed;
         if (!fSelectPositionFixed)
-            setNewSelectionPositionByMouse(ev.pos);
+            setNewSelectionPositionByMouse(mpos);
         return true;
     }
     else if (fMode == kModeHide && ev.press && ev.button == 1) {
@@ -633,11 +636,13 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
 
 bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
 {
+    DGL::Point<int> mpos{int(ev.pos.getX() + 0.5), int(ev.pos.getY() + 0.5)};
+
     switch (fMode) {
     case kModeScale:
         if (fScaleRectDragging) {
-            int x1 = ev.pos.getX();
-            int y1 = ev.pos.getY();
+            int x1 = mpos.getX();
+            int y1 = mpos.getY();
             int x2 = fSelectionOrigin.x;
             int y2 = fSelectionOrigin.y;
             if (x1 > x2)
@@ -650,7 +655,7 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
         break;
     case kModeSelect:
         if (!fSelectPositionFixed)
-            setNewSelectionPositionByMouse(ev.pos);
+            setNewSelectionPositionByMouse(mpos);
         break;
     }
 

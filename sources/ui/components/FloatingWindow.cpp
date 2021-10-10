@@ -19,7 +19,7 @@ void FloatingWindow::repositionWithinLimits()
     setAbsolutePos(restrictWithinLimits(getAbsolutePos()));
 }
 
-void FloatingWindow::moveAlong(Widget *w)
+void FloatingWindow::moveAlong(SubWidget *w)
 {
     DISTRHO_SAFE_ASSERT_RETURN(w != nullptr, );
 
@@ -51,7 +51,7 @@ void FloatingWindow::onPositionChanged(const PositionChangedEvent &ev)
     int dX = ev.pos.getX() - ev.oldPos.getX();
     int dY = ev.pos.getY() - ev.oldPos.getY();
 
-    for (Widget *w : fMoveAlong) {
+    for (SubWidget *w : fMoveAlong) {
         DGL::Point<int> p = w->getAbsolutePos();
         p.setX(p.getX() + dX);
         p.setY(p.getY() + dY);

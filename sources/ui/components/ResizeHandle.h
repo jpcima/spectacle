@@ -3,7 +3,7 @@
 #include <functional>
 class ColorPalette;
 
-class ResizeHandle : public NanoWidget {
+class ResizeHandle : public NanoSubWidget {
 public:
     ResizeHandle(Widget *group, const ColorPalette &palette);
 

@@ -3,7 +3,7 @@
 #include "ui/FontEngine.h"
 class ColorPalette;
 
-class TextLabel : public NanoWidget {
+class TextLabel : public NanoSubWidget {
 public:
     TextLabel(Widget *group, const ColorPalette &palette);
 

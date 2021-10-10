@@ -3,13 +3,13 @@
 #include <vector>
 class ColorPalette;
 
-class FloatingWindow : public NanoWidget {
+class FloatingWindow : public NanoSubWidget {
 public:
     FloatingWindow(Widget *group, ColorPalette &palette);
 
     void setMoveLimits(DGL::Point<int> origin, DGL::Size<uint> size);
     void repositionWithinLimits();
-    void moveAlong(Widget *w);
+    void moveAlong(SubWidget *w);
     void setAllVisible(bool visible);
 
 protected:
@@ -23,7 +23,7 @@ private:
 
 private:
     ColorPalette &fPalette;
-    std::vector<Widget *> fMoveAlong;
+    std::vector<SubWidget *> fMoveAlong;
     bool fIsDragging = false;
     DGL::Point<int> fDragMouseOrigin;
     DGL::Point<int> fDragStartingWindowPos;
