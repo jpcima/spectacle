@@ -556,7 +556,8 @@ void UISpectralAnalyzer::doResize(uint width, uint height)
     fSpectrumView->setSize(width, height);
 
     fMainToolBar->setAbsolutePos(0, 0);
-    fMainToolBar->setSize(fMainToolBar->getIdealWidth(), 40);
+    fMainToolBar->setHeight(40);
+    fMainToolBar->setWidth(fMainToolBar->getIdealWidth());
 
     FloatingWindow *floats[] = {fSetupWindow, fScaleWindow, fSelectWindow, fColorWindow};
 
