@@ -55,11 +55,12 @@ protected:
     void sampleRateChanged(double newSampleRate) override;
 
     void uiIdle() override;
-    void uiReshape(uint width, uint height) override;
+    void doResize(uint width, uint height);
 
     void onNanoDisplay() override;
     bool onMouse(const MouseEvent &ev) override;
     bool onMotion(const MotionEvent &ev) override;
+    void onResize(const ResizeEvent& ev) override;
 
 protected:
     void onToolBarItemClicked(int id) override;

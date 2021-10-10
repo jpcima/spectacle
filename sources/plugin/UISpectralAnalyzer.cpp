@@ -453,7 +453,12 @@ UISpectralAnalyzer::UISpectralAnalyzer()
         setSize(newSize);
     };
 
-    uiReshape(getWidth(), getHeight());
+    // make order explicit (widgets on top of the stack are handled first)
+    fResizeHandle->toFront();
+    fMainToolBar->toFront();
+
+    // setup initial size
+    doResize(getWidth(), getHeight());
 }
 
 UISpectralAnalyzer::~UISpectralAnalyzer()
@@ -545,10 +550,7 @@ void UISpectralAnalyzer::uiIdle()
     }
 }
 
-/**
-  Window reshape function, called when the parent window is resized.
-*/
-void UISpectralAnalyzer::uiReshape(uint width, uint height)
+void UISpectralAnalyzer::doResize(uint width, uint height)
 {
     fSpectrumView->setAbsolutePos(0, 0);
     fSpectrumView->setSize(width, height);
@@ -585,6 +587,9 @@ void UISpectralAnalyzer::onNanoDisplay()
 
 bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
 {
+    if (UI::onMouse(ev))
+        return true;
+
     DGL::Point<int> mpos{int(ev.pos.getX() + 0.5), int(ev.pos.getY() + 0.5)};
 
     if (fMode == kModeScale && ev.press && ev.button == 1) {
@@ -636,6 +641,9 @@ bool UISpectralAnalyzer::onMouse(const MouseEvent &ev)
 
 bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
 {
+    if (UI::onMotion(ev))
+        return true;
+
     DGL::Point<int> mpos{int(ev.pos.getX() + 0.5), int(ev.pos.getY() + 0.5)};
 
     switch (fMode) {
@@ -660,6 +668,12 @@ bool UISpectralAnalyzer::onMotion(const MotionEvent &ev)
     }
 
     return false;
+}
+
+void UISpectralAnalyzer::onResize(const ResizeEvent& ev)
+{
+    UI::onResize(ev);
+    doResize(ev.size.getWidth(), ev.size.getHeight());
 }
 
 // -----------------------------------------------------------------------

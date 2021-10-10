@@ -5,7 +5,7 @@
 #include "Window.hpp"
 
 SpinBoxChooser::SpinBoxChooser(Widget *group, const ColorPalette &palette)
-    : NanoWidget(group),
+    : NanoSubWidget(group),
       fPalette(palette)
 {
     updateLayout();
@@ -117,7 +117,7 @@ void SpinBoxChooser::onNanoDisplay()
 
 void SpinBoxChooser::onResize(const ResizeEvent &ev)
 {
-    (void)ev;
+    NanoSubWidget::onResize(ev);
     updateLayout();
 }
 

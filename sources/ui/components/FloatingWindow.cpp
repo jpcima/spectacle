@@ -3,7 +3,7 @@
 #include "Window.hpp"
 
 FloatingWindow::FloatingWindow(Widget *group, ColorPalette &palette)
-    : NanoWidget(group),
+    : NanoSubWidget(group),
       fPalette(palette)
 {
 }
@@ -61,6 +61,9 @@ void FloatingWindow::onPositionChanged(const PositionChangedEvent &ev)
 
 bool FloatingWindow::onMouse(const MouseEvent &ev)
 {
+    if (NanoSubWidget::onMouse(ev))
+        return true;
+
     if (ev.press && ev.button == 1) {
         const int w = getWidth();
         const int h = getHeight();
@@ -87,6 +90,9 @@ bool FloatingWindow::onMouse(const MouseEvent &ev)
 
 bool FloatingWindow::onMotion(const MotionEvent &ev)
 {
+    if (NanoSubWidget::onMotion(ev))
+        return true;
+
     if (fIsDragging) {
         DGL::Point<int> orig = fDragMouseOrigin;
         int curx = ev.pos.getX() + getAbsoluteX();

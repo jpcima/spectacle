@@ -3,7 +3,7 @@
 #include "plugin/ColorPalette.h"
 
 TextLabel::TextLabel(Widget *group, const ColorPalette &palette)
-    : NanoWidget(group),
+    : NanoSubWidget(group),
       fPalette(palette)
 {
 }

@@ -5,7 +5,7 @@
 #include "Window.hpp"
 
 ResizeHandle::ResizeHandle(Widget *group, const ColorPalette &palette)
-    : NanoWidget(group),
+    : NanoSubWidget(group),
       fPalette(palette)
 {
 }

@@ -5,9 +5,10 @@
 #include "Window.hpp"
 
 MainToolBar::MainToolBar(Widget *group, ColorPalette &palette)
-    : NanoWidget(group),
+    : NanoSubWidget(group),
       fPalette(palette)
 {
+    setHeight(40);
 }
 
 void MainToolBar::addButton(int id, const char *label, const char *icon)
@@ -89,7 +90,7 @@ void MainToolBar::onNanoDisplay()
 
 void MainToolBar::onResize(const ResizeEvent &ev)
 {
-    (void)ev;
+    NanoSubWidget::onResize(ev);
     updatePositionsAndSizes();
     repaint();
 }
