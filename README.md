@@ -49,3 +49,4 @@ The LV2 version is recommended in this case.
 - @trebmuh, [LibraZiK](https://librazik.tuxfamily.org/): documentation
 - @rghvdberg: software name
 - @alcomposer, @unfa: suggestions for improvement
+- @falkTX: the DISTRHO Plugin Framework, code contributions
