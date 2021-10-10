@@ -8,6 +8,7 @@ MainToolBar::MainToolBar(Widget *group, ColorPalette &palette)
     : NanoSubWidget(group),
       fPalette(palette)
 {
+    setHeight(40);
 }
 
 void MainToolBar::addButton(int id, const char *label, const char *icon)

@@ -457,6 +457,7 @@ UISpectralAnalyzer::UISpectralAnalyzer()
     fResizeHandle->toFront();
     fMainToolBar->toFront();
 
+    // setup initial size
     doResize(getWidth(), getHeight());
 }
 
