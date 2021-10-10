@@ -22,7 +22,7 @@ static double ftom(double f)
 
 ///
 SpectrumView::SpectrumView(Widget *parent, const ColorPalette &palette)
-    : NanoWidget(parent),
+    : NanoSubWidget(parent),
       fColorPalette(palette)
 {
 }

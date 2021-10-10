@@ -3,7 +3,7 @@
 #include "Window.hpp"
 
 SelectionRectangle::SelectionRectangle(Widget *group, ColorPalette &palette)
-    : NanoWidget(group),
+    : NanoSubWidget(group),
       fPalette(palette)
 {
 }
