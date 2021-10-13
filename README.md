@@ -28,6 +28,34 @@ Spectacle is a real-time spectral analyzer using the short-time Fourier transfor
 Some hosts on Linux, including Carla (as of 2.3.0), are unable to turn off the DSP when the VST editor is closed.
 The LV2 version is recommended in this case.
 
+## Build instructions
+
+1. Obtain prerequisites
+
+Install needed packages:
+
+- `git`
+- `build-essential`
+- `pkg-config`
+- `libfftw3-dev`
+- `libx11-dev`
+- `libgl-dev`
+- `libjack-jackd2-dev` or `libjack-dev`
+
+2. Check out the repository and submodules
+
+```
+git clone https://github.com/jpcima/spectacle.git
+cd spectacle
+git submodule update --init --recursive
+```
+
+3. Compile
+
+```
+make
+```
+
 ## Change log
 
 **2.0**
