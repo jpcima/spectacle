@@ -77,7 +77,7 @@ private:
     W *makeSubwidget(A &&... args)
     {
         W *w = new W(std::forward<A>(args)...);
-        fSubWidgets.push_back(std::unique_ptr<Widget>(w));
+        fSubWidgets.push_back(std::unique_ptr<SubWidget>(w));
         return w;
     }
 
@@ -119,7 +119,7 @@ private:
 
     ResizeHandle *fResizeHandle = nullptr;
 
-    std::vector<std::unique_ptr<Widget>> fSubWidgets;
+    std::vector<std::unique_ptr<SubWidget>> fSubWidgets;
 
     std::vector<float> fFrequencies;
     std::vector<float> fMagnitudes;
