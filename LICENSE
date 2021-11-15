@@ -1,5 +1,6 @@
-Spectral Analyzer audio effect based on DISTRHO Plugin Framework (DPF)
-Copyright (C) 2019 Jean Pierre Cimalando <jpcima@protonmail.com>
+ISC License
+
+Copyright (c) 2019-2021 Jean Pierre Cimalando <jp-dev@inbox.ru>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
